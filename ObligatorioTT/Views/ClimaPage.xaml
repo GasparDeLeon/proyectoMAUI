@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.Views.ClimaPage"
+             Title="Clima en Punta del Este"
+             BackgroundColor="{StaticResource FondoOscuro}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Label Text="Clima actual"
+                   Style="{StaticResource Headline}"
+                   HorizontalOptions="Center" />
+
+            <Frame BackgroundColor="{StaticResource AzulPrincipal}"
+                   CornerRadius="12"
+                   Padding="15"
+                   Margin="0,10">
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label x:Name="lblFechaActual" Text="..." Style="{StaticResource SubHeadline}" />
+                    <Image x:Name="imgIconoActual" HeightRequest="60" WidthRequest="60" />
+                    <Label x:Name="lblTempActual" Text="..." Style="{StaticResource DescriptionText}" />
+                    <Label x:Name="lblDescripcionActual" Text="..." Style="{StaticResource DescriptionText}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="Pronóstico próximos 5 días"
+                   Style="{StaticResource Headline}"
+                   HorizontalOptions="Center" />
+
+            <CollectionView x:Name="climaCollection"
+                            ItemsLayout="HorizontalList"
+                            HeightRequest="200">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BackgroundColor="{StaticResource AzulPrincipal}"
+                               CornerRadius="10"
+                               Padding="10"
+                               Margin="5"
+                               WidthRequest="140">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label Text="{Binding Fecha}" Style="{StaticResource SubHeadline}" />
+                                <Image Source="{Binding Icono}" HeightRequest="50" WidthRequest="50" />
+                                <Label Text="{Binding Temperatura, StringFormat='{}{0} °C'}" Style="{StaticResource DescriptionText}" />
+                                <Label Text="{Binding Descripcion}" FontSize="12" HorizontalTextAlignment="Center" TextColor="White" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+          
+            <!--<Button Text="Volver al inicio"
+                    Clicked="Volver_Clicked"
+                    BackgroundColor="{StaticResource AzulSecundario}"
+                    TextColor="{StaticResource Blanco}"
+                    CornerRadius="10"
+                    Padding="10"
+                    Margin="0,20,0,0"
+                    HorizontalOptions="Center" />-->
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

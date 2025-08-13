@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.Views.PeliculasPage"
+             Title="Próximos estrenos"
+             BackgroundColor="{StaticResource }">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="15">
+
+            <Label Text="Filtrar por género"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="White" />
+
+            <Picker x:Name="pickerGeneros"
+                    SelectedIndexChanged="pickerGeneros_SelectedIndexChanged"
+                    BackgroundColor="White"
+                    TextColor="Black" />
+
+            <CollectionView ItemsSource="{Binding Peliculas}"
+                ItemSizingStrategy="MeasureAllItems"
+                Margin="0,10">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="16" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame
+                Margin="0,0,0,16"
+                Padding="10"
+                BackgroundColor="White"
+                CornerRadius="15"
+                HasShadow="True"
+                MaximumWidthRequest="400"
+                HorizontalOptions="Center">
+                            <VerticalStackLayout>
+                                <Image
+                        Source="{Binding PosterUrl}"
+                        HeightRequest="300"
+                        Aspect="AspectFit"
+                        HorizontalOptions="Fill"
+                        Margin="0,0,0,10" />
+
+                                <Label
+                        Text="{Binding Titulo}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="DarkBlue" />
+
+                                <Label
+                        Text="{Binding Descripcion}"
+                        FontSize="14"
+                        TextColor="Black"
+                        LineBreakMode="WordWrap" />
+
+                                <Label
+                        Text="Ver tráiler"
+                        TextColor="Blue"
+                        FontAttributes="Italic">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

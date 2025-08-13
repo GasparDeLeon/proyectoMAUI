@@ -1,0 +1,59 @@
+# === Visual Studio / Usuario ===
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# === Resultados de compilación ===
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+[Bb]uild[Ll]og.*
+Debug/
+Release/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# === VS Code (opcional: descomenta si no quieres subir la carpeta) ===
+#.vscode/
+
+# === Paquetes (packages.config) / NuGet artefactos ===
+packages/
+*.nupkg
+*.snupkg
+
+# === Pruebas ===
+TestResult*/
+[TestResults]/
+
+# === Herramientas y otros IDEs ===
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# === Publicación / certificados ===
+*.pubxml
+*.publishsettings
+*.pfx
+*.p12
+
+# === MAUI / Xamarin / móviles ===
+*.iobj
+*.ipdb
+*.aab
+*.apk
+*.app
+*.ipa
+*.keystore
+*.jks
+
+# === Temporales / logs ===
+*.tmp
+*.log
+
+# === Archivos de configuración sensibles (si los usas) ===
+*.env
+*.env.*
+secrets.json

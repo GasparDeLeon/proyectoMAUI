@@ -1,0 +1,69 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.MainPage"
+             BackgroundColor="{StaticResource FondoOscuro}">
+
+    <Grid>
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1A2332" Offset="0.0" />
+                    <GradientStop Color="#2C3E50" Offset="1.0" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="25" Spacing="25"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center">
+
+                <Label Text="La Voz del Este"
+                       Style="{StaticResource Headline}" />
+
+                <Label Text="Bienvenido, Usuario"
+                       Style="{StaticResource SubHeadline}" />
+
+                <Frame BackgroundColor="{StaticResource Blanco}"
+                       Padding="30"
+                       CornerRadius="25"
+                       HasShadow="True"
+                       WidthRequest="320">
+
+                    <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+
+                        <Image Source="reproductor_radio.png"
+                               HeightRequest="120"
+                               Aspect="AspectFit" />
+
+                        <Label Text="Reproductor de radio en desarrollo..."
+                               Style="{StaticResource SubHeadline}"
+                               TextColor="{StaticResource AzulPrincipal}"
+                               HorizontalOptions="Center" />
+
+                        <Button Text="▶ Reproducir"
+                                IsEnabled="False"
+                                Opacity="0.6"
+                                WidthRequest="200"
+                                HeightRequest="50"
+                                FontSize="18"
+                                CornerRadius="12"
+                                BackgroundColor="{StaticResource AzulSecundario}"
+                                TextColor="{StaticResource Blanco}" />
+
+                        <BoxView HeightRequest="6"
+                                 WidthRequest="220"
+                                 BackgroundColor="{StaticResource AzulSecundario}"
+                                 CornerRadius="3" />
+
+                        <Label Text="🔊 Volumen"
+                               Style="{StaticResource DescriptionText}"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource AzulSecundario}"/>
+
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.Views.RegistroPage"
+             Title="Crear cuenta"
+             BackgroundColor="#1a2332">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Image x:Name="imgFoto" HeightRequest="140" Aspect="AspectFill" BackgroundColor="#0f1724"/>
+            <HorizontalStackLayout Spacing="10">
+                <Button Text="Tomar foto" Clicked="BtnTomarFoto_Clicked"/>
+                <Button Text="Elegir de galería" Clicked="BtnElegirFoto_Clicked"/>
+            </HorizontalStackLayout>
+
+            <Entry x:Name="txtUser" Placeholder="Usuario"/>
+            <Entry x:Name="txtPass" Placeholder="Contraseña" IsPassword="True"/>
+            <Entry x:Name="txtNombre" Placeholder="Nombre completo"/>
+            <Entry x:Name="txtDir" Placeholder="Dirección"/>
+            <Entry x:Name="txtTel" Placeholder="Teléfono" Keyboard="Telephone"/>
+            <Entry x:Name="txtEmail" Placeholder="Email" Keyboard="Email"/>
+
+            <Button Text="Registrarme" Clicked="BtnRegistrar_Clicked"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

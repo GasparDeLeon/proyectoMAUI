@@ -1,0 +1,46 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.Views.CotizacionesPage"
+             Title="Cotizaciones"
+             BackgroundColor="{StaticResource FondoOscuro}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="Cotizaciones del día"
+                   Style="{StaticResource Headline}"
+                   HorizontalOptions="Center" />
+
+            <Frame BackgroundColor="{StaticResource Blanco}" CornerRadius="15" HasShadow="True">
+                <VerticalStackLayout Padding="10">
+                    <Label Text="Dólar (USD)" TextColor="Black" />
+                    <Label x:Name="lblUSD" Text="-" TextColor="Black" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="{StaticResource Blanco}" CornerRadius="15" HasShadow="True">
+                <VerticalStackLayout Padding="10">
+                    <Label Text="Euro (EUR)" TextColor="Black" />
+                    <Label x:Name="lblEUR" Text="-" TextColor="Black" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="{StaticResource Blanco}" CornerRadius="15" HasShadow="True">
+                <VerticalStackLayout Padding="10">
+                    <Label Text="Real (BRL)" TextColor="Black" />
+                    <Label x:Name="lblBRL" TextColor="Black" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="Actualizar cotizaciones"
+                    Clicked="Actualizar_Clicked"
+                    HorizontalOptions="Center" />
+
+            <Label x:Name="lblFecha"
+                   Text="Última actualización: -"
+                   Style="{StaticResource DescriptionText}"
+                   HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
