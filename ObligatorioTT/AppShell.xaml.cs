@@ -10,8 +10,9 @@ namespace ObligatorioTT
 
           
             Routing.RegisterRoute("ClimaPage", typeof(ClimaPage));
+            Routing.RegisterRoute(nameof(SponsorFormPage), typeof(SponsorFormPage));
 
-          
+
 
         }
         private async void OnLogoutClicked(object sender, EventArgs e)
