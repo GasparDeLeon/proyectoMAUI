@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
-using SQLitePCL;
 using ObligatorioTT.Data;
-using ObligatorioTT.Services;
 using ObligatorioTT.Helpers; 
+using ObligatorioTT.Services;
+using SQLitePCL;
+using Microsoft.Maui.Controls.Maps;
 
 namespace ObligatorioTT
 {
@@ -20,7 +21,8 @@ namespace ObligatorioTT
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+                })
+                .UseMauiMaps();
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db3");
 
@@ -28,7 +30,7 @@ namespace ObligatorioTT
             {
                 var svc = new DatabaseService(dbPath);
                 Task.Run(() => svc.InitAsync()).Wait();
-                return svc;
+                return svc; 
             });
 
 

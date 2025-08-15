@@ -49,16 +49,9 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-          
-            <!--<Button Text="Volver al inicio"
-                    Clicked="Volver_Clicked"
-                    BackgroundColor="{StaticResource AzulSecundario}"
-                    TextColor="{StaticResource Blanco}"
-                    CornerRadius="10"
-                    Padding="10"
-                    Margin="0,20,0,0"
-                    HorizontalOptions="Center" />-->
 
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
+  
+    

@@ -8,7 +8,7 @@
     Shell.FlyoutBehavior="Flyout"
     Title="ObligatorioTT">
 
-    <!-- LO TUYO: se mantiene tal cual -->
+    
     <ShellContent
         Title="Inicio"
         ContentTemplate="{DataTemplate local:MainPage}"
@@ -34,7 +34,15 @@
         Route="PeliculasPage"
         ContentTemplate="{DataTemplate views:PeliculasPage}" />
 
-   
+    <ShellContent
+      Title="Patrocinadores"
+      Route="SponsorsPage"
+      ContentTemplate="{DataTemplate views:SponsorsPage}" />
+    
+    <ShellContent Title="Mapa" Route="MapaPage"
+                ContentTemplate="{DataTemplate views:MapaPage}" />
+
+
     <MenuItem Text="Cerrar sesión"
               Clicked="OnLogoutClicked" />
 </Shell>
