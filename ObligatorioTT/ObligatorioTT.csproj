@@ -80,6 +80,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiAsset Update="Resources\Raw\azuremap.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <MauiFont Update="Resources\Fonts\Arial.ttf">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </MauiFont>
@@ -110,6 +116,12 @@
 	  <MauiXaml Update="Views\SponsorsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Platforms\Windows\Package.appxmanifest">
+	    <CopyToOutputDirectory></CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

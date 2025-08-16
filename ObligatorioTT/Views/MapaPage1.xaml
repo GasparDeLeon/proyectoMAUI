@@ -4,5 +4,5 @@
              xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="ObligatorioTT.Views.MapaPage"
              Title="Mapa">
-    <maps:Map x:Name="map" MapType="Street"/>
+    <maps:Map x:Name="map" MapType="Street" />
 </ContentPage>
