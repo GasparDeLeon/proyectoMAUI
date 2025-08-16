@@ -1,9 +1,14 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
+
 #if ANDROID || IOS
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
-using Microsoft.Maui.Devices.Sensors; // Location
+using Microsoft.Maui.Devices.Sensors;
 #endif
-using Microsoft.Maui.Controls;
 
 namespace ObligatorioTT.Views
 {
@@ -12,33 +17,63 @@ namespace ObligatorioTT.Views
         public MapaPage()
         {
 #if WINDOWS
-  
-            Content = new Grid
+           
+            Content = new Label
             {
-                Padding = 20,
-                Children =
-                {
-                    new Label
-                    {
-                        Text = "El mapa está disponible en Android. Soporte para Windows (Azure Maps) próximamente.",
-                        HorizontalOptions = LayoutOptions.Center,
-                        VerticalOptions = LayoutOptions.Center,
-                        HorizontalTextAlignment = TextAlignment.Center
-                    }
-                }
+                Text = "Cargando mapa...",
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
             };
-            return; 
+
+            Dispatcher.Dispatch(async () =>
+            {
+                try
+                {
+                    Content = await CrearWebViewAzureMapsAsync();
+                }
+                catch (Exception ex)
+                {
+                    Content = new ScrollView
+                    {
+                        Content = new Label
+                        {
+                            Text = $"No se pudo cargar Azure Maps.\n\n{ex.Message}",
+                            Margin = 20
+                        }
+                    };
+                }
+            });
+            return;
 #else
             InitializeComponent();
 #endif
 
 #if ANDROID || IOS
-           
-         
-            var pos = new Location(-34.9011, -56.1645);
+            // En Android/iOS seguimos usando el control de mapas nativo de MAUI
+            var pos = new Location(-34.9011, -56.1645); // Montevideo
             map.MoveToRegion(MapSpan.FromCenterAndRadius(pos, Distance.FromKilometers(3)));
             map.Pins.Add(new Pin { Label = "Prueba", Address = "Montevideo", Location = pos });
 #endif
         }
+
+#if WINDOWS
+        private async Task<View> CrearWebViewAzureMapsAsync()
+        {
+            using var stream = await FileSystem.OpenAppPackageFileAsync("azuremap.html");
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
+        
+            html = html.Replace("__AZURE_MAPS_KEY__", Secrets.AzureMapsKey);
+
+            return new WebView
+            {
+                HorizontalOptions = LayoutOptions.Fill,
+                VerticalOptions = LayoutOptions.Fill,
+                Source = new HtmlWebViewSource { Html = html }
+            };
+        }
+#endif
     }
 }
+
