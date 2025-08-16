@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 using ObligatorioTT.Data;
-using ObligatorioTT.Helpers; 
+using ObligatorioTT.Helpers;
 using ObligatorioTT.Services;
 using SQLitePCL;
-using Microsoft.Maui.Controls.Maps;
+using Microsoft.Maui.Controls.Maps; // ok dejarlo; si querés, podés envolverlo con #if ANDROID || IOS
 
 namespace ObligatorioTT
 {
@@ -21,8 +21,13 @@ namespace ObligatorioTT
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                })
-                .UseMauiMaps();
+                    fonts.AddFont("Arial.ttf", "ArialAlias");
+                });
+
+#if ANDROID || IOS
+            // Solo Android/iOS: habilita MAUI Maps (Google/Map control)
+            builder.UseMauiMaps();
+#endif
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db3");
 
@@ -30,16 +35,16 @@ namespace ObligatorioTT
             {
                 var svc = new DatabaseService(dbPath);
                 Task.Run(() => svc.InitAsync()).Wait();
-                return svc; 
+                return svc;
             });
 
-
+            // Si tu BiometricAuthService es multiplataforma, dejalo así.
+            // Si más adelante querés limitarlo a Android/iOS, envolvelo con #if ANDROID || IOS
             builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
 
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-
 
             var app = builder.Build();
             ServiceHelper.Services = app.Services;
