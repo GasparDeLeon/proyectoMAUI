@@ -38,9 +38,10 @@
       Title="Patrocinadores"
       Route="SponsorsPage"
       ContentTemplate="{DataTemplate views:SponsorsPage}" />
-    
-    <ShellContent Title="Mapa" Route="MapaPage"
-                ContentTemplate="{DataTemplate views:MapaPage}" />
+
+    <ShellContent Title="Mapa" Route="MapaPage1"
+              ContentTemplate="{DataTemplate views:MapaPage1}" />
+
 
 
     <MenuItem Text="Cerrar sesión"
