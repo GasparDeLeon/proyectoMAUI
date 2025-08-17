@@ -5,19 +5,19 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 
 #if ANDROID || IOS
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Maps;
-using Microsoft.Maui.Devices.Sensors;
+using Microsoft.Maui.Devices.Sensors;     // Location
+using Microsoft.Maui.Maps;                 // MapSpan, Distance
+using ControlsMaps = Microsoft.Maui.Controls.Maps; // Map, Pin (alias del namespace)
 #endif
 
 namespace ObligatorioTT.Views
 {
-    public partial class MapaPage : ContentPage
+    public partial class MapaPage1 : ContentPage
     {
-        public MapaPage()
+        public MapaPage1()
         {
 #if WINDOWS
-           
+            // En Windows usamos Azure Maps con un WebView (archivo html local)
             Content = new Label
             {
                 Text = "Cargando mapa...",
@@ -43,16 +43,35 @@ namespace ObligatorioTT.Views
                     };
                 }
             });
-            return;
+
+            return; // Evita ejecutar el código de otras plataformas
 #else
             InitializeComponent();
 #endif
 
 #if ANDROID || IOS
-            // En Android/iOS seguimos usando el control de mapas nativo de MAUI
-            var pos = new Location(-34.9011, -56.1645); // Montevideo
-            map.MoveToRegion(MapSpan.FromCenterAndRadius(pos, Distance.FromKilometers(3)));
-            map.Pins.Add(new Pin { Label = "Prueba", Address = "Montevideo", Location = pos });
+            // En Android/iOS usamos el control de mapas nativo de MAUI (declarado en el XAML con x:Name="map")
+            if (this.FindByName<ControlsMaps.Map>("map") is ControlsMaps.Map map)
+            {
+                var pos = new Location(-34.9011, -56.1645); // Montevideo
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(pos, Distance.FromKilometers(3)));
+
+                map.Pins.Add(new ControlsMaps.Pin
+                {
+                    Label = "Prueba",
+                    Address = "Montevideo",
+                    Location = pos
+                });
+            }
+            else
+            {
+                Content = new Label
+                {
+                    Text = "No se encontró el control de mapa (x:Name=\"map\").",
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                };
+            }
 #endif
         }
 
@@ -63,7 +82,7 @@ namespace ObligatorioTT.Views
             using var reader = new StreamReader(stream);
             var html = await reader.ReadToEndAsync();
 
-        
+            // Reemplaza el placeholder por tu clave real (debes tener Secrets.AzureMapsKey definido)
             html = html.Replace("__AZURE_MAPS_KEY__", Secrets.AzureMapsKey);
 
             return new WebView
@@ -76,4 +95,3 @@ namespace ObligatorioTT.Views
 #endif
     }
 }
-
