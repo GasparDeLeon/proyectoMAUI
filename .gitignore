@@ -57,3 +57,6 @@ _ReSharper*/
 *.env
 *.env.*
 secrets.json
+
+# === Claves locales ===
+ObligatorioTT/Secrets.cs
