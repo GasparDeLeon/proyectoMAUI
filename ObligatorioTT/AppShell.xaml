@@ -1,48 +1,132 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="ObligatorioTT.AppShell"
+ x:Class="ObligatorioTT.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ObligatorioTT"
     xmlns:views="clr-namespace:ObligatorioTT.Views"
     Shell.FlyoutBehavior="Flyout"
-    Title="ObligatorioTT">
+    Title="ObligatorioTT"
+     BackgroundColor="{DynamicResource ShellBackgroundColor}"
+    ForegroundColor="{DynamicResource ShellForegroundColor}"
+    TitleColor="{DynamicResource ShellTitleColor}"
+    FlyoutBackgroundColor="{DynamicResource ShellBackgroundColor}"
+    >
 
-    
-    <ShellContent
-        Title="Inicio"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <FlyoutItem x:Name="RootItem" FlyoutDisplayOptions="AsMultipleItems" Route="Root"
+Shell.TabBarIsVisible="False" >
+        <ShellContent x:Name="InicioItem"
+                      Title="Inicio"
+                      Route="MainPage"
+                      ContentTemplate="{DataTemplate local:MainPage}" />
 
-    <ShellContent 
-        Title="Clima"
-        ContentTemplate="{DataTemplate views:ClimaPage}"
-        Route="ClimaPage" />
+        <ShellContent x:Name="ClimaItem"
+                      Title="Clima"
+                      Route="ClimaPage"
+                      ContentTemplate="{DataTemplate views:ClimaPage}" />
 
-    <ShellContent
-        Title="Cotizaciones"
-        Route="CotizacionesPage"
-        ContentTemplate="{DataTemplate views:CotizacionesPage}"/>
+        <ShellContent x:Name="CotizacionesItem"
+                      Title="Cotizaciones"
+                      Route="CotizacionesPage"
+                      ContentTemplate="{DataTemplate views:CotizacionesPage}" />
 
-    <ShellContent
-        Title="Noticias"
-        Route="NoticiasPage"
-        ContentTemplate="{DataTemplate views:NoticiasPage}" />
+        <ShellContent x:Name="NoticiasItem"
+                      Title="Noticias"
+                      Route="NoticiasPage"
+                      ContentTemplate="{DataTemplate views:NoticiasPage}" />
 
-    <ShellContent
-        Title="Peliculas"
-        Route="PeliculasPage"
-        ContentTemplate="{DataTemplate views:PeliculasPage}" />
+        <ShellContent x:Name="PeliculasItem"
+                      Title="Películas"
+                      Route="PeliculasPage"
+                      ContentTemplate="{DataTemplate views:PeliculasPage}" />
 
-    <ShellContent
-      Title="Patrocinadores"
-      Route="SponsorsPage"
-      ContentTemplate="{DataTemplate views:SponsorsPage}" />
-    
-    <ShellContent Title="Mapa" Route="MapaPage"
-                ContentTemplate="{DataTemplate views:MapaPage}" />
+        <ShellContent x:Name="PatrocinadoresItem"
+                      Title="Patrocinadores"
+                      Route="SponsorsPage"
+                      ContentTemplate="{DataTemplate views:SponsorsPage}" />
 
+        <ShellContent x:Name="MapaItem"
+                      Title="Mapa"
+                      Route="MapaPage"
+                      ContentTemplate="{DataTemplate views:MapaPage}" />
 
-    <MenuItem Text="Cerrar sesión"
-              Clicked="OnLogoutClicked" />
+        <ShellContent x:Name="PreferenciasShell"
+              Title="Preferencias"
+              Route="Preferencias"
+              ContentTemplate="{DataTemplate views:PreferenciasFlyoutPage}"
+              IsVisible="False" />
+
+    </FlyoutItem>
+
+    <!-- Footer homogéneo -->
+    <Shell.FlyoutFooter>
+        <Grid Padding="0,0,0,14" BackgroundColor="{DynamicResource ShellBackgroundColor}">
+
+            <VerticalStackLayout Spacing="0" Padding="0">
+
+                <!-- Preferencias -->
+                <Grid x:Name="PrefRow"
+                      Padding="16,14"
+                      BackgroundColor="Transparent"
+                      HorizontalOptions="FillAndExpand">
+                    <Label Text="Preferencias"
+                           FontSize="16"
+                           TextColor="{DynamicResource ShellForegroundColor}"
+                           VerticalOptions="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPreferenciasFooterTapped" />
+                    </Grid.GestureRecognizers>
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup>
+                            <VisualState Name="Normal" />
+                            <VisualState Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="PrefRow" Property="BackgroundColor" Value="#111111" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="PrefRow" Property="BackgroundColor" Value="#1A1A1A" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Grid>
+
+                <BoxView HeightRequest="1"
+         BackgroundColor="{DynamicResource ShellSeparatorColor}"
+         Opacity="0.08" />
+
+                <!-- Cerrar sesión -->
+                <Grid x:Name="LogoutRow"
+                      Padding="16,14"
+                      BackgroundColor="Transparent"
+                      HorizontalOptions="FillAndExpand">
+                    <Label Text="Cerrar sesión"
+                           FontSize="16"
+                           TextColor="{DynamicResource ShellForegroundColor}"
+                           VerticalOptions="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCerrarSesionFooterTapped" />
+                    </Grid.GestureRecognizers>
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup>
+                            <VisualState Name="Normal" />
+                            <VisualState Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="LogoutRow" Property="BackgroundColor" Value="#111111" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="LogoutRow" Property="BackgroundColor" Value="#1A1A1A" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Grid>
+
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutFooter>
 </Shell>

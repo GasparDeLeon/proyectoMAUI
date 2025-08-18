@@ -48,5 +48,18 @@
             <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="HeightRequest" Value="50" />
         </Style>
+        <!-- Colores base del Shell -->
+        <Color x:Key="ShellBackgroundColor">#111111</Color>
+        <!-- fondo flyout / navbar -->
+        <Color x:Key="ShellForegroundColor">#FFFFFF</Color>
+        <!-- texto ítems / iconos -->
+        <Color x:Key="ShellTitleColor">#FFFFFF</Color>
+        <!-- título en la barra -->
+
+        <!-- (Opcional) matices para estados / separadores -->
+        <Color x:Key="ShellSeparatorColor">#FFFFFFFF</Color>
+        <!-- usalo con Opacity 0.08 -->
+        <Color x:Key="ShellHoverColor">#222222</Color>
+
     </Application.Resources>
 </Application>
