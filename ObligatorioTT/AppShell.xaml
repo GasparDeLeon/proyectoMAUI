@@ -50,11 +50,7 @@ Shell.TabBarIsVisible="False" >
                       Route="MapaPage"
                       ContentTemplate="{DataTemplate views:MapaPage}" />
 
-        <ShellContent x:Name="PreferenciasShell"
-              Title="Preferencias"
-              Route="Preferencias"
-              ContentTemplate="{DataTemplate views:PreferenciasFlyoutPage}"
-              IsVisible="False" />
+
 
     </FlyoutItem>
 

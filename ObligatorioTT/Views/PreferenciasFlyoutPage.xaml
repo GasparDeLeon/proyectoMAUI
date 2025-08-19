@@ -4,56 +4,66 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Preferencias del menú"
-    BackgroundColor="#1a2332">
+    BackgroundColor="#1a2332"
+    Shell.PresentationMode="ModalAnimated"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="True">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="12">
+    <!-- Layout: contenido scrolleable + botón fijo abajo -->
+    <Grid RowDefinitions="*,Auto" RowSpacing="12" Padding="16">
 
-            <Label Text="Elegí qué secciones ver en el menú"
-                   TextColor="White"
-                   FontAttributes="Bold"
-                   FontSize="18" />
+        <!-- Contenido -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="12">
 
-    
+                <Label Text="Elegí qué secciones ver en el menú"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       FontSize="18" />
 
-            <!-- Clima -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Clima" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swClima" Grid.Column="1" />
-            </Grid>
+                <!-- Clima -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Clima" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swClima" Grid.Column="1" />
+                </Grid>
 
-            <!-- Cotizaciones -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Cotizaciones" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swCotizaciones" Grid.Column="1" />
-            </Grid>
+                <!-- Cotizaciones -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Cotizaciones" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swCotizaciones" Grid.Column="1" />
+                </Grid>
 
-            <!-- Noticias -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Noticias" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swNoticias" Grid.Column="1" />
-            </Grid>
+                <!-- Noticias -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Noticias" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swNoticias" Grid.Column="1" />
+                </Grid>
 
-            <!-- Películas -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Películas" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swPeliculas" Grid.Column="1" />
-            </Grid>
+                <!-- Películas -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Películas" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swPeliculas" Grid.Column="1" />
+                </Grid>
 
-            <!-- Patrocinadores -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Patrocinadores" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swPatrocinadores" Grid.Column="1" />
-            </Grid>
+                <!-- Patrocinadores -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Patrocinadores" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swPatrocinadores" Grid.Column="1" />
+                </Grid>
 
-            <!-- Mapa -->
-            <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
-                <Label Text="Mapa" TextColor="White" VerticalOptions="Center" />
-                <Switch x:Name="swMapa" Grid.Column="1" />
-            </Grid>
+                <!-- Mapa -->
+                <Grid ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="#243046">
+                    <Label Text="Mapa" TextColor="White" VerticalOptions="Center" />
+                    <Switch x:Name="swMapa" Grid.Column="1" />
+                </Grid>
 
-            <Button Text="Guardar cambios" Clicked="Guardar_Clicked" />
-           
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Botón Guardar fijo abajo -->
+        <Button Grid.Row="1"
+                Text="Guardar cambios"
+                HeightRequest="48"
+                Clicked="Guardar_Clicked" />
+    </Grid>
 </ContentPage>
