@@ -1,18 +1,23 @@
+using System;
+using Microsoft.Maui.Controls;
 using ObligatorioTT.Services;
 
 namespace ObligatorioTT.Views
 {
     public partial class PreferenciasFlyoutPage : ContentPage
     {
+        private bool _isSaving;
+
         public PreferenciasFlyoutPage()
         {
             InitializeComponent();
-            Cargar();
         }
 
-        private void Cargar()
+        protected override void OnAppearing()
         {
-            // Inicio ya no se toca: siempre visible en AppShell
+            base.OnAppearing();
+
+            // Cargar estado actual de switches
             swClima.IsToggled = FlyoutPreferences.Get(FlyoutPreferences.ShowClima, true);
             swCotizaciones.IsToggled = FlyoutPreferences.Get(FlyoutPreferences.ShowCotizaciones, true);
             swNoticias.IsToggled = FlyoutPreferences.Get(FlyoutPreferences.ShowNoticias, true);
@@ -23,19 +28,34 @@ namespace ObligatorioTT.Views
 
         private async void Guardar_Clicked(object sender, EventArgs e)
         {
-            // Guardar estado de cada switch
-            FlyoutPreferences.Set(FlyoutPreferences.ShowClima, swClima.IsToggled);
-            FlyoutPreferences.Set(FlyoutPreferences.ShowCotizaciones, swCotizaciones.IsToggled);
-            FlyoutPreferences.Set(FlyoutPreferences.ShowNoticias, swNoticias.IsToggled);
-            FlyoutPreferences.Set(FlyoutPreferences.ShowPeliculas, swPeliculas.IsToggled);
-            FlyoutPreferences.Set(FlyoutPreferences.ShowPatrocinadores, swPatrocinadores.IsToggled);
-            FlyoutPreferences.Set(FlyoutPreferences.ShowMapa, swMapa.IsToggled);
+            if (_isSaving) return; // evita doble click
+            _isSaving = true;
+            try
+            {
+                // Guardar valores
+                FlyoutPreferences.Set(FlyoutPreferences.ShowClima, swClima.IsToggled);
+                FlyoutPreferences.Set(FlyoutPreferences.ShowCotizaciones, swCotizaciones.IsToggled);
+                FlyoutPreferences.Set(FlyoutPreferences.ShowNoticias, swNoticias.IsToggled);
+                FlyoutPreferences.Set(FlyoutPreferences.ShowPeliculas, swPeliculas.IsToggled);
+                FlyoutPreferences.Set(FlyoutPreferences.ShowPatrocinadores, swPatrocinadores.IsToggled);
+                FlyoutPreferences.Set(FlyoutPreferences.ShowMapa, swMapa.IsToggled);
 
-            // Avisamos a AppShell que se refresque (manteniendo el orden original del XAML)
-            FlyoutPreferences.RaiseChanged();
+                // Notificar al AppShell para refrescar el Flyout
+                FlyoutPreferences.RaiseChanged();
 
-            // Pop-up en vez de label
-            await DisplayAlert("Preferencias", "Cambios guardados correctamente.", "OK");
+                // Mostrar confirmación ANTES de cerrar el modal
+                await DisplayAlert("Preferencias", "Preferencias guardadas con éxito.", "OK");
+
+                // Cerrar el modal (como la página se abre modal)
+                if (Navigation.ModalStack.Contains(this))
+                    await Navigation.PopModalAsync(true);
+                else
+                    await Shell.Current.GoToAsync("..", true);
+            }
+            finally
+            {
+                _isSaving = false;
+            }
         }
     }
 }
