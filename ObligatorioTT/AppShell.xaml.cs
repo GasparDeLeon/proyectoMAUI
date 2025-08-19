@@ -13,7 +13,7 @@ namespace ObligatorioTT
             InitializeComponent();
 
             // Rutas existentes
-            Routing.RegisterRoute("ClimaPage", typeof(ClimaPage));
+           
             Routing.RegisterRoute(nameof(SponsorFormPage), typeof(SponsorFormPage));
 
             // Ruta para la pantalla de preferencias (página normal)
