@@ -15,5 +15,16 @@ namespace ObligatorioTT.Models
 
         [NotNull]                   // requerido (ruta local de la imagen)
         public string LogoPath { get; set; }
+<<<<<<< Updated upstream
+=======
+
+        // ✅ NUEVO: coordenadas opcionales
+        public double? Latitud { get; set; }
+        public double? Longitud { get; set; }
+
+        // Propiedad de conveniencia (no se persiste en SQLite)
+        [Ignore]
+        public bool TieneCoordenadas => Latitud.HasValue && Longitud.HasValue;
+>>>>>>> Stashed changes
     }
 }
