@@ -1,18 +1,16 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
+using SQLitePCL;
+
 using ObligatorioTT.Data;
 using ObligatorioTT.Helpers;
 using ObligatorioTT.Services;
-<<<<<<< Updated upstream
-using SQLitePCL;
-using Microsoft.Maui.Controls.Maps; // ok dejarlo; si querés, podés envolverlo con #if ANDROID || IOS
-=======
 
 #if ANDROID || IOS
-using Microsoft.Maui.Controls.Maps; // Solo necesario en Android/iOS
+using Microsoft.Maui.Controls.Maps; // solo Android/iOS
 #endif
->>>>>>> Stashed changes
 
 namespace ObligatorioTT
 {
@@ -20,7 +18,7 @@ namespace ObligatorioTT
     {
         public static MauiApp CreateMauiApp()
         {
-            SQLitePCL.Batteries_V2.Init();
+            Batteries_V2.Init();
 
             var builder = MauiApp.CreateBuilder();
             builder
@@ -33,11 +31,11 @@ namespace ObligatorioTT
                 });
 
 #if ANDROID || IOS
-            // Habilita MAUI Maps SOLO en Android/iOS (Windows queda aislado)
+            // Habilitar Maps solo en Android/iOS (Windows queda aislado)
             builder.UseMauiMaps();
 #endif
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db3");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db4");
 
             builder.Services.AddSingleton<DatabaseService>(_ =>
             {
@@ -46,10 +44,10 @@ namespace ObligatorioTT
                 return svc;
             });
 
-            // Servicio biométrico (si más adelante querés limitarlo a Android/iOS, se puede envolver con #if)
+            // Servicio biométrico (si después querés limitarlo a Android/iOS, se puede envolver con #if)
             builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
 
-            // ✅ Registro seguro por defecto: implementación vacía del mapa (no rompe Windows)
+            // ✅ Implementación No-Op del mapa para que Windows no rompa
             builder.Services.AddSingleton<ISponsorMapView, NoOpSponsorMapView>();
 
 #if DEBUG

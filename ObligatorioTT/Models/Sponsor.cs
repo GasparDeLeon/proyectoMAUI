@@ -8,23 +8,20 @@ namespace ObligatorioTT.Models
         public int Id { get; set; }
 
         [MaxLength(100), NotNull]   // requerido
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
 
         [MaxLength(200), NotNull]   // requerido
-        public string Direccion { get; set; }
+        public string Direccion { get; set; } = string.Empty;
 
         [NotNull]                   // requerido (ruta local de la imagen)
-        public string LogoPath { get; set; }
-<<<<<<< Updated upstream
-=======
+        public string LogoPath { get; set; } = string.Empty;
 
-        // ✅ NUEVO: coordenadas opcionales
+        // Coordenadas opcionales (se completan en Android)
         public double? Latitud { get; set; }
         public double? Longitud { get; set; }
 
-        // Propiedad de conveniencia (no se persiste en SQLite)
+        // Conveniencia (no se persiste)
         [Ignore]
         public bool TieneCoordenadas => Latitud.HasValue && Longitud.HasValue;
->>>>>>> Stashed changes
     }
 }
