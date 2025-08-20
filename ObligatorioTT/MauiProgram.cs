@@ -1,10 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
+using SQLitePCL;
+
 using ObligatorioTT.Data;
 using ObligatorioTT.Helpers;
 using ObligatorioTT.Services;
-using SQLitePCL;
-using Microsoft.Maui.Controls.Maps; // ok dejarlo; si querés, podés envolverlo con #if ANDROID || IOS
+
+#if ANDROID || IOS
+using Microsoft.Maui.Controls.Maps; // solo Android/iOS
+#endif
 
 namespace ObligatorioTT
 {
@@ -25,11 +31,11 @@ namespace ObligatorioTT
                 });
 
 #if ANDROID || IOS
-            // Solo Android/iOS: habilita MAUI Maps (Google/Map control)
+            // Habilitar Maps solo en Android/iOS (Windows queda aislado)
             builder.UseMauiMaps();
 #endif
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db3");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db4");
 
             builder.Services.AddSingleton<DatabaseService>(_ =>
             {
@@ -38,9 +44,11 @@ namespace ObligatorioTT
                 return svc;
             });
 
-            // Si tu BiometricAuthService es multiplataforma, dejalo así.
-            // Si más adelante querés limitarlo a Android/iOS, envolvelo con #if ANDROID || IOS
+            // Servicio biométrico (si después querés limitarlo a Android/iOS, se puede envolver con #if)
             builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
+
+            // ✅ Implementación No-Op del mapa para que Windows no rompa
+            builder.Services.AddSingleton<ISponsorMapView, NoOpSponsorMapView>();
 
 #if DEBUG
             builder.Logging.AddDebug();

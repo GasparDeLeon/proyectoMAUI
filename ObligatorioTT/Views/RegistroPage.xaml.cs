@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Net.Mail;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.Media;
 using ObligatorioTT.Data;
@@ -57,19 +62,60 @@ public partial class RegistroPage : ContentPage
         return dest;
     }
 
+    // ? Ahora valida que TODOS los campos estén completos (incluye foto)
     private bool Validar()
     {
         if (string.IsNullOrWhiteSpace(txtUser.Text)) return false;
         if (string.IsNullOrWhiteSpace(txtPass.Text)) return false;
+        if (string.IsNullOrWhiteSpace(txtNombre.Text)) return false;
+        if (string.IsNullOrWhiteSpace(txtDir.Text)) return false;
+        if (string.IsNullOrWhiteSpace(txtTel.Text)) return false;
         if (string.IsNullOrWhiteSpace(txtEmail.Text)) return false;
+        if (string.IsNullOrWhiteSpace(_fotoLocalPath)) return false;
         return true;
+    }
+
+    private static bool EsEmailValido(string email)
+    {
+        try { _ = new MailAddress(email); return true; }
+        catch { return false; }
+    }
+
+    private static bool EsTelefonoValido(string tel)
+    {
+        // Solo dígitos, entre 7 y 20
+        var onlyDigits = new string(tel.Where(char.IsDigit).ToArray());
+        return !string.IsNullOrEmpty(onlyDigits)
+               && onlyDigits.Length >= 7
+               && onlyDigits.Length <= 20
+               && onlyDigits.Length == tel.Length;
     }
 
     private async void BtnRegistrar_Clicked(object sender, EventArgs e)
     {
+        // 1) Obligatorios
         if (!Validar())
         {
-            await DisplayAlert("Validación", "Usuario, contraseña y email son obligatorios.", "OK");
+            await DisplayAlert("Validación", "Todos los campos son obligatorios (incluida la foto).", "OK");
+            return;
+        }
+
+        // 2) Reglas de formato
+        if (txtPass.Text!.Length < 6)
+        {
+            await DisplayAlert("Validación", "La contraseña debe tener al menos 6 caracteres.", "OK");
+            return;
+        }
+
+        if (!EsEmailValido(txtEmail.Text!))
+        {
+            await DisplayAlert("Validación", "Ingresá un email válido.", "OK");
+            return;
+        }
+
+        if (!EsTelefonoValido(txtTel.Text!))
+        {
+            await DisplayAlert("Validación", "Ingresá un teléfono válido (solo números, 7 a 20 dígitos).", "OK");
             return;
         }
 
@@ -84,16 +130,16 @@ public partial class RegistroPage : ContentPage
         var nuevo = new Usuario
         {
             UserName = userName,
-            Password = SecurityHelper.Sha256(txtPass.Text!), 
-            NombreCompleto = txtNombre.Text?.Trim() ?? "",
-            Direccion = txtDir.Text?.Trim() ?? "",
-            Telefono = txtTel.Text?.Trim() ?? "",
-            Email = txtEmail.Text?.Trim() ?? "",
+            Password = SecurityHelper.Sha256(txtPass.Text!),
+            NombreCompleto = txtNombre.Text!.Trim(),
+            Direccion = txtDir.Text!.Trim(),
+            Telefono = txtTel.Text!.Trim(),
+            Email = txtEmail.Text!.Trim(),
             FotoPath = _fotoLocalPath
         };
 
         await _db.InsertUsuarioAsync(nuevo);
         await DisplayAlert("Registro", "Usuario creado con éxito.", "OK");
-        await Navigation.PopAsync(); 
+        await Navigation.PopAsync();
     }
 }
