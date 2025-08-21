@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.Views.SponsorFormPage"
              Title="Patrocinador">
+
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="10">
             <Image x:Name="imgLogo" HeightRequest="140" Aspect="AspectFit" />
@@ -12,6 +13,12 @@
             <Entry x:Name="txtDireccion" Placeholder="Dirección *" TextChanged="OnCampoChanged" />
 
             <Button x:Name="btnGuardar" Text="Guardar" IsEnabled="False" Clicked="OnGuardar" />
+
+    
+            <Button x:Name="btnEditarUbicacion"
+                    Text="Editar ubicación"
+                    Clicked="OnEditarUbicacionClicked"
+                    IsVisible="{OnPlatform Android=true, WinUI=false, iOS=false, MacCatalyst=false}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

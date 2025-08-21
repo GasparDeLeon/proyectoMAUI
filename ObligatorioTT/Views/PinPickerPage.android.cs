@@ -5,11 +5,10 @@ using Microsoft.Maui.Controls;
 using ObligatorioTT.Models;
 using ObligatorioTT.Services;
 
-
 using ControlsMaps = Microsoft.Maui.Controls.Maps;
 using MauiMaps = Microsoft.Maui.Maps;
 
-using Microsoft.Maui.Devices.Sensors;       
+using Microsoft.Maui.Devices.Sensors;
 using ControlsMapClickedEventArgs = Microsoft.Maui.Controls.Maps.MapClickedEventArgs;
 
 namespace ObligatorioTT.Views
@@ -19,7 +18,6 @@ namespace ObligatorioTT.Views
     {
         public int SponsorId { get; private set; }
 
-        
         public string? SponsorIdQuery
         {
             get => SponsorId.ToString();
@@ -117,10 +115,12 @@ namespace ObligatorioTT.Views
             ColocarOActualizarPin(e.Location);
         }
 
+        // Forzar refresco del marcador: limpiar y re-crear el pin
         private void ColocarOActualizarPin(Location loc)
         {
-            if (_pinActual == null)
+            Device.BeginInvokeOnMainThread(() =>
             {
+                _map.Pins.Clear();
                 _pinActual = new ControlsMaps.Pin
                 {
                     Label = _sponsor?.Nombre ?? "Patrocinador",
@@ -129,12 +129,12 @@ namespace ObligatorioTT.Views
                     Location = loc
                 };
                 _map.Pins.Add(_pinActual);
-            }
-            else
-            {
-                _pinActual.Location = loc;
-            }
-            _btnGuardar.IsEnabled = true;
+
+                _map.MoveToRegion(MauiMaps.MapSpan.FromCenterAndRadius(
+                    loc, MauiMaps.Distance.FromKilometers(1)));
+
+                _btnGuardar.IsEnabled = true;
+            });
         }
 
         private async void OnGuardarUbicacion(object? sender, EventArgs e)
@@ -148,7 +148,6 @@ namespace ObligatorioTT.Views
 
             await DisplayAlert("OK", "Ubicación guardada", "Cerrar");
 
-        
             await Shell.Current.GoToAsync("//SponsorsPage");
         }
     }
