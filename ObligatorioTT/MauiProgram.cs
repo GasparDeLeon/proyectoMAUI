@@ -9,7 +9,7 @@ using ObligatorioTT.Helpers;
 using ObligatorioTT.Services;
 
 #if ANDROID || IOS
-using Microsoft.Maui.Controls.Maps; // solo Android/iOS
+using Microsoft.Maui.Controls.Maps;
 #endif
 
 namespace ObligatorioTT
@@ -31,23 +31,19 @@ namespace ObligatorioTT
                 });
 
 #if ANDROID || IOS
-            // Habilitar Maps solo en Android/iOS (Windows queda aislado)
+            // Habilitar Maps en Android/iOS
             builder.UseMauiMaps();
 #endif
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "appdata.db4");
 
-            builder.Services.AddSingleton<DatabaseService>(_ =>
-            {
-                var svc = new DatabaseService(dbPath);
-                Task.Run(() => svc.InitAsync()).Wait();
-                return svc;
-            });
+            // Registrar DatabaseService SIN bloquear la UI (InitAsync se llama en App.xaml.cs)
+            builder.Services.AddSingleton(new DatabaseService(dbPath));
 
-            // Servicio biométrico (si después querés limitarlo a Android/iOS, se puede envolver con #if)
+            // Servicio biométrico
             builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
 
-            // ✅ Implementación No-Op del mapa para que Windows no rompa
+            // Implementación No-Op del mapa para que Windows no rompa
             builder.Services.AddSingleton<ISponsorMapView, NoOpSponsorMapView>();
 
 #if DEBUG
