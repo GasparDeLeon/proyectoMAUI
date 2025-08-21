@@ -16,9 +16,12 @@ namespace ObligatorioTT
         {
             InitializeComponent();
 
+}
             // Rutas SOLO para páginas que NO están en el Flyout
-            Routing.RegisterRoute(nameof(SponsorFormPage), typeof(SponsorFormPage));
-            Routing.RegisterRoute(nameof(PreferenciasFlyoutPage), typeof(PreferenciasFlyoutPage));
+
+            // Rutas existentes
+           
+
 
 #if ANDROID
             // Ruta SOLO Android: selector de pin en mapa
