@@ -3,73 +3,173 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.Views.PeliculasPage"
              Title="Próximos estrenos"
-             BackgroundColor="{StaticResource }">
+             BackgroundColor="#0b1220">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="15" Spacing="15">
+    <Grid>
+        <!-- Fondo gradiente -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0b1220" Offset="0" />
+                    <GradientStop Color="#121a2a" Offset="1" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
-            <Label Text="Filtrar por género"
-                   FontAttributes="Bold"
-                   FontSize="18"
-                   TextColor="White" />
+        <RefreshView x:Name="refreshView" Refreshing="RefreshView_Refreshing">
+            <ScrollView>
+                <VerticalStackLayout Padding="16" Spacing="14">
 
-            <Picker x:Name="pickerGeneros"
-                    SelectedIndexChanged="pickerGeneros_SelectedIndexChanged"
-                    BackgroundColor="White"
-                    TextColor="Black" />
-
-            <CollectionView ItemsSource="{Binding Peliculas}"
-                ItemSizingStrategy="MeasureAllItems"
-                Margin="0,10">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="16" />
-                </CollectionView.ItemsLayout>
-
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame
-                Margin="0,0,0,16"
-                Padding="10"
-                BackgroundColor="White"
-                CornerRadius="15"
-                HasShadow="True"
-                MaximumWidthRequest="400"
-                HorizontalOptions="Center">
-                            <VerticalStackLayout>
-                                <Image
-                        Source="{Binding PosterUrl}"
-                        HeightRequest="300"
-                        Aspect="AspectFit"
-                        HorizontalOptions="Fill"
-                        Margin="0,0,0,10" />
-
-                                <Label
-                        Text="{Binding Titulo}"
-                        FontSize="18"
-                        FontAttributes="Bold"
-                        TextColor="DarkBlue" />
-
-                                <Label
-                        Text="{Binding Descripcion}"
-                        FontSize="14"
-                        TextColor="Black"
-                        LineBreakMode="WordWrap" />
-
-                                <Label
-                        Text="Ver tráiler"
-                        TextColor="Blue"
-                        FontAttributes="Italic">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
-                                    </Label.GestureRecognizers>
-                                </Label>
+                    <!-- Header -->
+                    <Frame Padding="14" HasShadow="True" CornerRadius="16" BackgroundColor="#1f2937">
+                        <Grid RowDefinitions="Auto,Auto">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Próximos estrenos"
+                                       TextColor="White"
+                                       FontSize="22"
+                                       FontAttributes="Bold" />
+                                <Label x:Name="lblUpdated"
+                                       Text="Actualizado: -"
+                                       TextColor="#9CA3AF"
+                                       FontSize="12" />
                             </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
+                            <!-- Barra de progreso (sutil) -->
+                            <ProgressBar x:Name="busyBar"
+                                         Grid.Row="1"
+                                         HeightRequest="3"
+                                         IsVisible="False"
+                                         Progress="0"/>
+                        </Grid>
+                    </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                    <!-- Filtro por género -->
+                    <Frame Padding="12" HasShadow="True" CornerRadius="16" BackgroundColor="#111827">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Filtrar por género" TextColor="White" FontAttributes="Bold"/>
+                            <Picker x:Name="pickerGeneros"
+                                    SelectedIndexChanged="pickerGeneros_SelectedIndexChanged"
+                                    BackgroundColor="#0b1220"
+                                    TextColor="White"
+                                    TitleColor="#9CA3AF"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Lista de películas -->
+                    <CollectionView x:Name="MoviesView"
+                                    ItemsSource="{Binding Peliculas}"
+                                    Margin="0,0,0,16"
+                                    SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout Padding="24" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="No hay estrenos para este género." TextColor="#9CA3AF" />
+                                <Button Text="Reintentar" Clicked="Reintentar_Clicked" />
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="16"/>
+                        </CollectionView.ItemsLayout>
+
+                        <!-- Card de película (expandible) -->
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="12">
+                                    <Grid ColumnDefinitions="120,*" ColumnSpacing="12">
+                                        <!-- Poster -->
+                                        <Frame Padding="0"
+                                               CornerRadius="14"
+                                               HasShadow="False"
+                                               BackgroundColor="#0b1220"
+                                               WidthRequest="120"
+                                               HeightRequest="180"
+                                               HorizontalOptions="Start"
+                                               VerticalOptions="Start">
+                                            <Image Aspect="AspectFill">
+                                                <Image.Source>
+                                                    <UriImageSource Uri="{Binding PosterUrl}"
+                                                                    CachingEnabled="True"
+                                                                    CacheValidity="2.00:00:00"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </Frame>
+
+                                        <!-- Texto -->
+                                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                            <Label Text="{Binding Titulo}"
+                                                   TextColor="White"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation"
+                                                   MaxLines="2"/>
+
+                                            <!-- Sinopsis expandible -->
+                                            <Label Text="{Binding Descripcion}"
+                                                   TextColor="#D1D5DB"
+                                                   FontSize="13"
+                                                   LineBreakMode="WordWrap"
+                                                   MaxLines="4">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding IsExpanded}"
+                                                                 Value="True">
+                                                        <Setter Property="MaxLines" Value="50" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Frame Padding="6,2" BackgroundColor="#1f2937" CornerRadius="10" HasShadow="False">
+                                                    <Label Text="{Binding FechaEstreno, StringFormat='Estreno: {0:dd/MM/yyyy}'}"
+                                                           TextColor="#E5E7EB" FontSize="12"/>
+                                                </Frame>
+                                                <Frame Padding="6,2" BackgroundColor="#1f2937" CornerRadius="10" HasShadow="False">
+                                                    <Label Text="{Binding Rating, StringFormat='Rating: {0:F1}'}"
+                                                           TextColor="#E5E7EB" FontSize="12"/>
+                                                </Frame>
+                                            </HorizontalStackLayout>
+
+                                            <!-- Acciones -->
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Button Clicked="ToggleExpand_Clicked"
+                                                        CommandParameter="{Binding}"
+                                                        BackgroundColor="#374151"
+                                                        TextColor="White"
+                                                        CornerRadius="10"
+                                                        Padding="10,6"
+                                                        WidthRequest="110">
+                                                    <Button.Triggers>
+                                                        <DataTrigger TargetType="Button"
+                                                                     Binding="{Binding IsExpanded}"
+                                                                     Value="True">
+                                                            <Setter Property="Text" Value="Ver menos" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Button"
+                                                                     Binding="{Binding IsExpanded}"
+                                                                     Value="False">
+                                                            <Setter Property="Text" Value="Ver más" />
+                                                        </DataTrigger>
+                                                    </Button.Triggers>
+                                                </Button>
+
+                                                <Button Text="Ver tráiler"
+                                                        Clicked="VerTrailer_Clicked"
+                                                        CommandParameter="{Binding}"
+                                                        BackgroundColor="#334155"
+                                                        TextColor="White"
+                                                        CornerRadius="10"
+                                                        Padding="10,6"
+                                                        IsEnabled="{Binding HasTrailer}"/>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
 </ContentPage>

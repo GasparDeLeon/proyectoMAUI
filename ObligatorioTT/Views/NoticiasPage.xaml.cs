@@ -1,7 +1,15 @@
-using Newtonsoft.Json.Linq;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.IO;
+using System.Linq;                       // <-- LINQ
+using System.Threading.Tasks;            // <-- Task
+using Microsoft.Maui.ApplicationModel;   // <-- MainThread, Launcher
+using Microsoft.Maui.Controls;           // <-- ContentPage, ProgressBar, Label, SearchBar
 using Microsoft.Maui.Storage;
-using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace ObligatorioTT.Views;
 
@@ -9,101 +17,268 @@ public partial class NoticiasPage : ContentPage
 {
     private const string API_KEY = "pub_4b4e4d9e60da4fcb9c8073837a300312";
     private const string LAST_UPDATE_KEY = "UltimaActualizacionNoticias";
+    private static readonly string CacheFilePath = Path.Combine(FileSystem.AppDataDirectory, "noticias_cache.json");
 
-    public class Noticia
+    private static readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(10) };
+    private readonly CultureInfo uy = new("es-UY");
+
+    private bool _isLoading = false;
+    private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _progressCts;
+    private string? _nextPageToken = null;
+    private string _queryActual = "uruguay";
+
+    // Bindings
+    public ObservableCollection<NoticiaItem> Items { get; } = new();
+
+    private string _emptyMessage = "No hay noticias para mostrar.";
+    public string EmptyMessage
     {
-        public string Titulo { get; set; }
-        public string Descripcion { get; set; }
-        public string Enlace { get; set; }  // Nuevo campo para el link
+        get => _emptyMessage;
+        set { if (_emptyMessage != value) { _emptyMessage = value; OnPropertyChanged(); } }
     }
 
-    public Command<string> EnlaceCommand { get; }
+    public class NoticiaItem
+    {
+        public string Titulo { get; set; } = "Sin título";
+        public string Descripcion { get; set; } = "Sin descripción";
+        public string Enlace { get; set; } = "";
+        public string ImagenUrl { get; set; } = "";
+        public string Fuente { get; set; } = "";
+        public DateTime? FechaPub { get; set; }
+    }
 
     public NoticiasPage()
     {
         InitializeComponent();
-        EnlaceCommand = new Command<string>(async (url) => await AbrirEnlace(url));
         BindingContext = this;
-        _ = CargarNoticiasSiCorresponde();
+
+        CargarDesdeCacheSiHay();
+        _ = LoadAsync(refresh: true);
     }
 
-    private async Task CargarNoticiasSiCorresponde()
+    // Helper: buscar control por nombre y castear seguro
+    private T? Q<T>(string name) where T : class => this.FindByName(name) as T;
+
+    // ---------------- Indicador (barra de progreso) ----------------
+    private async Task SetLoading(bool on)
     {
-        DateTime ultimaActualizacion = Preferences.Get(LAST_UPDATE_KEY, DateTime.MinValue);
+        var bar = Q<ProgressBar>("busyBar");
+        if (bar == null) return;
 
-        bool necesitaActualizar = (DateTime.Now - ultimaActualizacion).TotalHours >= 24;
-
-        if (necesitaActualizar)
+        if (on)
         {
-            await CargarNoticias();
-            Preferences.Set(LAST_UPDATE_KEY, DateTime.Now);
+            bar.IsVisible = true;
+            bar.Progress = 0;
+            _progressCts?.Cancel();
+            _progressCts = new CancellationTokenSource();
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    while (!_progressCts.IsCancellationRequested)
+                    {
+                        await MainThread.InvokeOnMainThreadAsync(async () =>
+                        {
+                            bar.Progress = 0;
+                            await bar.ProgressTo(1, 900, Easing.Linear);
+                        });
+                    }
+                }
+                catch { /* cancel */ }
+            });
         }
         else
         {
-            await CargarNoticias();
+            _progressCts?.Cancel();
+            try { await bar.ProgressTo(1, 200, Easing.CubicOut); } catch { }
+            bar.IsVisible = false;
+            bar.Progress = 0;
         }
     }
 
-    private async Task CargarNoticias(string palabraClave = "uruguay")
+    // ---------------- Eventos UI ----------------
+    private async void RefreshView_Refreshing(object sender, EventArgs e)
     {
-        try
-        {
-            string url = $"https://newsdata.io/api/1/news?apikey={API_KEY}&language=es&country=uy&q={palabraClave}";
-
-            using HttpClient client = new();
-            var response = await client.GetStringAsync(url);
-            var json = JObject.Parse(response);
-
-            var noticiasJson = json["results"];
-
-            if (noticiasJson == null || !noticiasJson.Any())
-            {
-                await DisplayAlert("Aviso", "No se encontraron noticias para esa palabra clave.", "OK");
-                NoticiasView.ItemsSource = null;
-                return;
-            }
-
-            var noticias = noticiasJson
-                .Take(5)
-                .Select(n => new Noticia
-                {
-                    Titulo = n["title"]?.ToString() ?? "Sin título",
-                    Descripcion = n["description"]?.ToString() ?? "Sin descripción",
-                    Enlace = n["link"]?.ToString() ?? ""
-                })
-                .ToList();
-
-            NoticiasView.ItemsSource = noticias;
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error al cargar noticias", ex.Message, "OK");
-        }
+        await LoadAsync(refresh: true);
+        if (sender is RefreshView rv) rv.IsRefreshing = false;
     }
-    private async void Buscar_Clicked(object sender, EventArgs e)
-    {
-        string palabraClave = txtBusqueda.Text?.Trim();
 
-        if (string.IsNullOrWhiteSpace(palabraClave))
+    private async void Buscar_Clicked(object sender, EventArgs e) => await BuscarAsync();
+
+    private async void SearchBar_SearchButtonPressed(object sender, EventArgs e) => await BuscarAsync();
+
+    private async Task BuscarAsync()
+    {
+        var sb = Q<SearchBar>("txtBusqueda");
+        var q = sb?.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(q) || q.Length < 3)
         {
-            await DisplayAlert("Aviso", "Ingrese una palabra clave para buscar.", "OK");
+            await DisplayAlert("Aviso", "Ingresá al menos 3 caracteres para buscar.", "OK");
             return;
         }
 
-        await CargarNoticias(palabraClave);
+        _queryActual = q;
+        await LoadAsync(refresh: true);
     }
 
+    private async void Reintentar_Clicked(object sender, EventArgs e) => await LoadAsync(refresh: true);
 
-    private async Task AbrirEnlace(string url)
+    private async void NoticiasView_RemainingItemsThresholdReached(object sender, EventArgs e)
     {
+        if (_nextPageToken is null || _isLoading) return; // no más páginas o ya cargando
+        await LoadAsync(refresh: false);
+    }
+
+    private async void NoticiasView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection?.FirstOrDefault() is NoticiaItem item && !string.IsNullOrWhiteSpace(item.Enlace))
+        {
+            try { await Launcher.Default.OpenAsync(item.Enlace); } catch { }
+        }
+        ((CollectionView)sender).SelectedItem = null;
+    }
+
+    // ---------------- Carga principal ----------------
+    private async Task LoadAsync(bool refresh)
+    {
+        if (_isLoading) return;
+        if (!refresh && _nextPageToken is null) return; // scroll sin token => fin
+
+        _isLoading = true;
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
         try
         {
-            if (!string.IsNullOrWhiteSpace(url))
-                await Launcher.Default.OpenAsync(url);
+            await SetLoading(true);
+
+            if (refresh)
+            {
+                _nextPageToken = null; // reiniciar paginación
+                Items.Clear();
+            }
+
+            var baseUrl = $"https://newsdata.io/api/1/news?apikey={API_KEY}&language=es&country=uy&q={Uri.EscapeDataString(_queryActual)}";
+            var url = _nextPageToken is null ? baseUrl : $"{baseUrl}&page={_nextPageToken}";
+
+            var jsonStr = await http.GetStringAsync(url, _cts.Token);
+            var json = JObject.Parse(jsonStr);
+
+            var results = json["results"] as JArray;
+            if (results == null || results.Count == 0)
+            {
+                if (Items.Count == 0) EmptyMessage = "No se encontraron noticias para esa búsqueda.";
+                return;
+            }
+
+            // Dedupe por enlace
+            var existentes = new HashSet<string>(Items.Select(i => i.Enlace ?? ""), StringComparer.OrdinalIgnoreCase);
+
+            var nuevos = results.Select(n => new NoticiaItem
+            {
+                Titulo = SafeDecode(n["title"]?.ToString(), "Sin título"),
+                Descripcion = SafeDecode(n["description"]?.ToString(), "Sin descripción"),
+                Enlace = n["link"]?.ToString() ?? "",
+                ImagenUrl = n["image_url"]?.ToString() ?? "",
+                Fuente = n["source_id"]?.ToString() ?? "",
+                FechaPub = ParseDate(n["pubDate"]?.ToString())
+            })
+            .Where(it => !string.IsNullOrWhiteSpace(it.Enlace) && !existentes.Contains(it.Enlace))
+            .ToList();
+
+            foreach (var it in nuevos) Items.Add(it);
+
+            // Cachear solo en refresh (primera tanda)
+            if (refresh)
+            {
+                GuardarCacheEnArchivo(jsonStr);
+                Preferences.Set(LAST_UPDATE_KEY, DateTime.Now);
+
+                var lbl = Q<Label>("lblUltima");
+                if (lbl != null)
+                    lbl.Text = $"Actualizado: {DateTime.Now.ToString("dd/MM/yyyy HH:mm", uy)}";
+            }
+
+            // Token de siguiente página
+            var next = json["nextPage"]?.ToString();
+            _nextPageToken = string.IsNullOrWhiteSpace(next) ? null : next;
+        }
+        catch (TaskCanceledException) { }
+        catch (HttpRequestException ex)
+        {
+            if (Items.Count == 0) EmptyMessage = "Error de red. Intentá nuevamente.";
+            await DisplayAlert("Error al cargar noticias", ex.Message, "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"No se pudo abrir el enlace.\n{ex.Message}", "OK");
+            if (Items.Count == 0) EmptyMessage = "Error al cargar. Intentá nuevamente.";
+            await DisplayAlert("Error al cargar noticias", ex.Message, "OK");
         }
+        finally
+        {
+            await SetLoading(false);
+            _isLoading = false;
+        }
+    }
+
+    // ---------------- Cache archivo ----------------
+    private void GuardarCacheEnArchivo(string json)
+    {
+        try { File.WriteAllText(CacheFilePath, json); }
+        catch { /* sin cache si falla */ }
+    }
+
+    private void CargarDesdeCacheSiHay()
+    {
+        try
+        {
+            if (!File.Exists(CacheFilePath)) return;
+
+            var cache = File.ReadAllText(CacheFilePath);
+            if (string.IsNullOrWhiteSpace(cache)) return;
+
+            var json = JObject.Parse(cache);
+            var results = json["results"] as JArray;
+            if (results == null) return;
+
+            Items.Clear();
+            foreach (var n in results)
+            {
+                Items.Add(new NoticiaItem
+                {
+                    Titulo = SafeDecode(n["title"]?.ToString(), "Sin título"),
+                    Descripcion = SafeDecode(n["description"]?.ToString(), "Sin descripción"),
+                    Enlace = n["link"]?.ToString() ?? "",
+                    ImagenUrl = n["image_url"]?.ToString() ?? "",
+                    Fuente = n["source_id"]?.ToString() ?? "",
+                    FechaPub = ParseDate(n["pubDate"]?.ToString())
+                });
+            }
+
+            var ts = Preferences.Get(LAST_UPDATE_KEY, DateTime.MinValue);
+            var lbl = Q<Label>("lblUltima");
+            if (ts != DateTime.MinValue && lbl != null)
+                lbl.Text = $"Actualizado: {ts.ToString("dd/MM/yyyy HH:mm", uy)}";
+        }
+        catch { /* ignorar cache roto */ }
+    }
+
+    // ---------------- Utilidades ----------------
+    private static DateTime? ParseDate(string? s)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return null;
+        if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var d))
+            return d.ToLocalTime();
+        return null;
+    }
+
+    private static string SafeDecode(string? s, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return fallback;
+        try { return WebUtility.HtmlDecode(s); } catch { return s; }
     }
 }
