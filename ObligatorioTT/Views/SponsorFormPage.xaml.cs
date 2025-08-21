@@ -1,5 +1,10 @@
+using System;
 using System.IO;
 using System.Linq; // FirstOrDefault
+using System.Diagnostics;
+using Microsoft.Maui.Controls; // ContentPage, Button, DisplayAlert, etc.
+using Microsoft.Maui.Storage;  // FileSystem
+using Microsoft.Maui.Media;    // MediaPicker
 using ObligatorioTT.Models;
 using ObligatorioTT.Services;
 
@@ -43,16 +48,34 @@ namespace ObligatorioTT.Views
                 if (s != null)
                 {
                     _model = s;
-                    txtNombre.Text = s.Nombre;
-                    txtDireccion.Text = s.Direccion;
+                    if (txtNombre != null) txtNombre.Text = s.Nombre;
+                    if (txtDireccion != null) txtDireccion.Text = s.Direccion;
                     _direccionOriginal = s.Direccion;
 
-                    if (!string.IsNullOrWhiteSpace(s.LogoPath))
+                    if (!string.IsNullOrWhiteSpace(s.LogoPath) && imgLogo != null)
                         imgLogo.Source = s.LogoPath;
                 }
             }
 
             ActualizarEstadoGuardar();
+
+#if ANDROID
+            // Mostrar/ocultar botones según si es ALTA (Id==0) o EDICIÓN (Id>0)
+            var enEdicion = _model.Id > 0;
+
+            // Botón "Editar ubicación" (solo en edición)
+            if (this.FindByName<Button>("btnEditarUbicacion") is Button btnEditar)
+            {
+                btnEditar.IsVisible = enEdicion;
+                btnEditar.IsEnabled = enEdicion;
+            }
+
+            // Botón "Ubicar en el mapa" (solo en alta)
+            if (this.FindByName<Button>("btnUbicarEnMapa") is Button btnUbicar)
+            {
+                btnUbicar.IsVisible = !enEdicion;
+            }
+#endif
         }
 
         private async void OnElegirLogo(object sender, EventArgs e)
@@ -69,12 +92,12 @@ namespace ObligatorioTT.Views
                 await src.CopyToAsync(dst);
 
                 _model.LogoPath = dest;
-                imgLogo.Source = dest;
+                if (imgLogo != null) imgLogo.Source = dest;
                 ActualizarEstadoGuardar();
             }
             catch
             {
-                // Silencioso por ahora; podrías mostrar un DisplayAlert si querés
+                // opcional: await DisplayAlert("Error", "No se pudo seleccionar la imagen.", "OK");
             }
         }
 
@@ -83,71 +106,104 @@ namespace ObligatorioTT.Views
 
         private void ActualizarEstadoGuardar()
         {
+            if (btnGuardar == null) return;
+
             btnGuardar.IsEnabled =
-                !string.IsNullOrWhiteSpace(txtNombre.Text) &&
-                !string.IsNullOrWhiteSpace(txtDireccion.Text) &&
+                !string.IsNullOrWhiteSpace(txtNombre?.Text) &&
+                !string.IsNullOrWhiteSpace(txtDireccion?.Text) &&
                 !string.IsNullOrWhiteSpace(_model.LogoPath);
         }
 
         private async void OnGuardar(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text))
-            { await DisplayAlert("Validación", "El nombre es obligatorio.", "OK"); return; }
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtNombre?.Text))
+                { await DisplayAlert("Validación", "El nombre es obligatorio.", "OK"); return; }
 
-            if (string.IsNullOrWhiteSpace(txtDireccion.Text))
-            { await DisplayAlert("Validación", "La dirección es obligatoria.", "OK"); return; }
+                if (string.IsNullOrWhiteSpace(txtDireccion?.Text))
+                { await DisplayAlert("Validación", "La dirección es obligatoria.", "OK"); return; }
 
-            if (string.IsNullOrWhiteSpace(_model.LogoPath))
-            { await DisplayAlert("Validación", "Debes seleccionar un logo.", "OK"); return; }
+                if (string.IsNullOrWhiteSpace(_model.LogoPath))
+                { await DisplayAlert("Validación", "Debes seleccionar un logo.", "OK"); return; }
 
-            // Actualizar modelo desde el formulario
-            _model.Nombre = txtNombre.Text.Trim();
-            _model.Direccion = txtDireccion.Text.Trim();
+                // Actualizar modelo desde el formulario
+                _model.Nombre = txtNombre.Text.Trim();
+                _model.Direccion = txtDireccion.Text.Trim();
 
 #if ANDROID
-            // Geocodificar SOLO en Android:
-            // - Si es alta (Id == 0), siempre geocodificamos.
-            // - Si es edición, geocodificamos solo si cambió la dirección.
-            bool debeGeocodificar = _model.Id == 0 ||
-                                    !string.Equals(_direccionOriginal, _model.Direccion, StringComparison.OrdinalIgnoreCase);
+                // Geocodificar SOLO en Android:
+                // - Si es alta (Id == 0), siempre geocodificamos.
+                // - Si es edición, geocodificamos solo si cambió la dirección.
+                bool debeGeocodificar = _model.Id == 0 ||
+                                        !string.Equals(_direccionOriginal, _model.Direccion, StringComparison.OrdinalIgnoreCase);
 
-            if (debeGeocodificar && !string.IsNullOrWhiteSpace(_model.Direccion))
-            {
-                try
+                if (debeGeocodificar && !string.IsNullOrWhiteSpace(_model.Direccion))
                 {
-                    var results = await Geocoding.GetLocationsAsync(_model.Direccion);
-                    var loc = results?.FirstOrDefault();
-                    if (loc != null)
+                    try
                     {
-                        _model.Latitud = loc.Latitude;
-                        _model.Longitud = loc.Longitude;
+                        var results = await Geocoding.GetLocationsAsync(_model.Direccion);
+                        var loc = results?.FirstOrDefault();
+                        if (loc != null)
+                        {
+                            _model.Latitud = loc.Latitude;
+                            _model.Longitud = loc.Longitude;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[Geocoding] {ex.Message}");
+                        // Si falla, seguimos guardando igual.
                     }
                 }
-                catch (Exception ex)
+#endif
+
+#if WINDOWS
+                // En Windows no hay mapas: evitá NULL en Lat/Long si el almacenamiento las requiere NOT NULL
+                _model.Latitud  ??= 0;
+                _model.Longitud ??= 0;
+#endif
+
+                if (_model.Id == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[Geocoding] {ex.Message}");
-                    // Si falla, dejamos Lat/Long en null y seguimos guardando igual
-                }
-            }
-#endif
+                    await SponsorRepository.Inst.InsertAsync(_model);
 
-            if (_model.Id == 0)
-            {
-                await SponsorRepository.Inst.InsertAsync(_model);
-
-                // ?? ANDROID: ir a la página para fijar el pin del nuevo sponsor
 #if ANDROID
-                await Shell.Current.GoToAsync($"PinPickerPage?id={_model.Id}");
-                return; // evitamos mostrar el alert y volver dos veces
+                    // ANDROID: ir a la página para fijar el pin del nuevo sponsor
+                    await Shell.Current.GoToAsync($"PinPickerPage?id={_model.Id}");
+                    return; // evitamos mostrar el alert y volver dos veces
 #endif
-            }
-            else
-            {
-                await SponsorRepository.Inst.UpdateAsync(_model);
-            }
+                }
+                else
+                {
+                    await SponsorRepository.Inst.UpdateAsync(_model);
+                }
 
-            await DisplayAlert("OK", "Patrocinador guardado.", "Cerrar");
-            await Shell.Current.GoToAsync("..");
+                await DisplayAlert("OK", "Patrocinador guardado.", "Cerrar");
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SponsorFormPage.OnGuardar] {ex}");
+                await DisplayAlert("Error al guardar",
+                    $"No se pudo guardar el patrocinador.\n\nDetalle: {ex.Message}",
+                    "Cerrar");
+            }
+        }
+
+        // Handler del botón "Editar ubicación"
+        // Existe SIEMPRE (Windows/Android), evitando el error del XAML.
+        private async void OnEditarUbicacionClicked(object sender, EventArgs e)
+        {
+            if (_model is null || _model.Id <= 0) return;
+
+#if ANDROID
+            await Shell.Current.GoToAsync($"PinPickerPage?id={_model.Id}");
+#else
+            await DisplayAlert("No disponible en Windows",
+                "La edición de ubicación (mover el pin en el mapa) está implementada en Android.",
+                "OK");
+#endif
         }
     }
 }

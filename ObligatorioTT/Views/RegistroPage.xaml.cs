@@ -29,6 +29,7 @@ public partial class RegistroPage : ContentPage
             var photo = await MediaPicker.CapturePhotoAsync();
             if (photo != null)
                 _fotoLocalPath = await GuardarFotoLocalAsync(photo);
+
             imgFoto.Source = _fotoLocalPath;
         }
         catch (Exception ex)
@@ -44,6 +45,7 @@ public partial class RegistroPage : ContentPage
             var photo = await MediaPicker.PickPhotoAsync();
             if (photo != null)
                 _fotoLocalPath = await GuardarFotoLocalAsync(photo);
+
             imgFoto.Source = _fotoLocalPath;
         }
         catch (Exception ex)
@@ -62,7 +64,7 @@ public partial class RegistroPage : ContentPage
         return dest;
     }
 
-    // ? Ahora valida que TODOS los campos estén completos (incluye foto)
+    // Valida que TODOS los campos estén completos (incluye foto)
     private bool Validar()
     {
         if (string.IsNullOrWhiteSpace(txtUser.Text)) return false;
@@ -119,26 +121,36 @@ public partial class RegistroPage : ContentPage
             return;
         }
 
+        // 3) Unicidad de nombre de usuario (opcional, ya la tenías)
         var userName = txtUser.Text!.Trim();
-        var existente = await _db.GetUsuarioByUserAsync(userName);
-        if (existente != null)
+        var existenteUser = await _db.GetUsuarioByUserAsync(userName);
+        if (existenteUser != null)
         {
             await DisplayAlert("Registro", "El nombre de usuario ya existe.", "OK");
             return;
         }
 
+        // 4) Construir modelo (DatabaseService normaliza el Email y valida duplicado)
         var nuevo = new Usuario
         {
             UserName = userName,
-            Password = SecurityHelper.Sha256(txtPass.Text!),
+            Password = SecurityHelper.Sha256(txtPass.Text!), // hash
             NombreCompleto = txtNombre.Text!.Trim(),
             Direccion = txtDir.Text!.Trim(),
             Telefono = txtTel.Text!.Trim(),
-            Email = txtEmail.Text!.Trim(),
+            Email = txtEmail.Text!.Trim(), // el servicio hace Trim+ToLowerInvariant()
             FotoPath = _fotoLocalPath
         };
 
-        await _db.InsertUsuarioAsync(nuevo);
+        // 5) Guardar usando (ok, error) para mostrar mensaje claro si el email ya existe
+        var (ok, error) = await _db.RegistrarUsuarioAsync(nuevo);
+
+        if (!ok)
+        {
+            await DisplayAlert("Registro", error ?? "No se pudo registrar.", "OK");
+            return;
+        }
+
         await DisplayAlert("Registro", "Usuario creado con éxito.", "OK");
         await Navigation.PopAsync();
     }
