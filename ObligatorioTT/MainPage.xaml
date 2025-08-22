@@ -21,8 +21,12 @@
                 <Label Text="La Voz del Este"
                        Style="{StaticResource Headline}" />
 
-                <Label Text="Bienvenido, Usuario"
-                       Style="{StaticResource SubHeadline}" />
+                <Label x:Name="lblBienvenida"
+                       Text="Bienvenido"
+                       FontSize="20"
+                       HorizontalOptions="Center"
+                       TextColor="White"/>  
+
 
                 <Frame BackgroundColor="{StaticResource Blanco}"
                        Padding="30"
