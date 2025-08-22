@@ -3,69 +3,104 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.Views.NoticiasPage"
              Title="Noticias"
-             x:Name="NoticiasPageRef"
-             BackgroundColor="{StaticResource FondoOscuro}">
+             BackgroundColor="#0b1220">
 
-    <ContentPage.Resources>
-        <DataTemplate x:Key="NoticiaTemplate">
-            <Frame CornerRadius="15"
-           Padding="10"
-           HasShadow="True"
-           BackgroundColor="White">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding Titulo}"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   TextColor="DarkSlateBlue"
-                   LineBreakMode="WordWrap" />
+    <Grid>
+        <!-- Fondo gradiente -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0b1220" Offset="0" />
+                    <GradientStop Color="#121a2a" Offset="1" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
-                    <Label Text="{Binding Descripcion}"
-                   FontSize="14"
-                   TextColor="Gray"
-                   LineBreakMode="WordWrap" />
+        <RefreshView x:Name="refreshView" Refreshing="RefreshView_Refreshing">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <!-- Header -->
+                <Frame Grid.Row="0" Padding="14" HasShadow="True" CornerRadius="16" BackgroundColor="#1f2937" Margin="16,16,16,8">
+                    <Grid RowDefinitions="Auto,Auto">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Últimas noticias" TextColor="White" FontSize="22" FontAttributes="Bold" />
+                            <Label x:Name="lblUltima" Text="Actualizado: -" TextColor="#9CA3AF" FontSize="12" />
+                        </VerticalStackLayout>
 
-                    <Label Text="Ver noticia completa"
-                   TextColor="Blue"
-                   FontAttributes="Italic">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer
-                        Command="{Binding Source={x:Reference NoticiasPageRef}, Path=EnlaceCommand}"
-                        CommandParameter="{Binding Enlace}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                </VerticalStackLayout>
-            </Frame>
-        </DataTemplate>
+                        <!-- Barra de progreso sutil (reemplaza spinner) -->
+                        <ProgressBar x:Name="busyBar"
+                                     Grid.Row="1"
+                                     HeightRequest="3"
+                                     IsVisible="False"
+                                     Progress="0"/>
+                    </Grid>
+                </Frame>
 
-    </ContentPage.Resources>
+                <!-- Búsqueda -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="16,0,16,8" ColumnSpacing="8">
+                    <SearchBar x:Name="txtBusqueda"
+                               Placeholder="Buscar por palabra clave"
+                               BackgroundColor="#111827"
+                               TextColor="White"
+                               PlaceholderColor="#9CA3AF"
+                               SearchButtonPressed="SearchBar_SearchButtonPressed"/>
+                    <Button Grid.Column="1" Text="Buscar" Clicked="Buscar_Clicked"
+                            BackgroundColor="#334155" TextColor="White" CornerRadius="10" Padding="12,8"/>
+                </Grid>
 
-    <ScrollView>
-        <StackLayout Padding="15" Spacing="0">
-            <Label Text="Últimas noticias"
-                   FontSize="40"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   HorizontalOptions="Center"
-                   Margin="0,10" />
-            <HorizontalStackLayout Spacing="10" Margin="0,0,0,10">
-                <Entry x:Name="txtBusqueda"
-           Placeholder="Buscar por palabra clave"
-           BackgroundColor="White"
-           WidthRequest="220"
-           TextColor="Black" />
-                <Button Text="Buscar"
-            Clicked="Buscar_Clicked"
-            BackgroundColor="#007bff"
-            TextColor="White" />
-            </HorizontalStackLayout>
+                <!-- Lista -->
+                <CollectionView x:Name="NoticiasView"
+                                Grid.Row="2"
+                                Margin="16,0,16,16"
+                                ItemsSource="{Binding Items}"
+                                SelectionMode="Single"
+                                RemainingItemsThreshold="4"
+                                RemainingItemsThresholdReached="NoticiasView_RemainingItemsThresholdReached"
+                                SelectionChanged="NoticiasView_SelectionChanged">
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout Padding="24" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="{Binding EmptyMessage}" TextColor="#9CA3AF" />
+                            <Button Text="Reintentar" Clicked="Reintentar_Clicked"/>
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
 
-            <CollectionView x:Name="NoticiasView"
-                            ItemTemplate="{StaticResource NoticiaTemplate}"
-                            Margin="0,10">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="20" />
-                </CollectionView.ItemsLayout>
-            </CollectionView>
-        </StackLayout>
-    </ScrollView>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="14"/>
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="16" HasShadow="True" Padding="0" BackgroundColor="#111827">
+                                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" Padding="12">
+                                    <!-- Imagen (con caché) -->
+                                    <Border Grid.RowSpan="3" StrokeThickness="0" StrokeShape="RoundRectangle 12" BackgroundColor="#0b1220" WidthRequest="120" HeightRequest="90">
+                                        <Image Aspect="AspectFill">
+                                            <Image.Source>
+                                                <UriImageSource Uri="{Binding ImagenUrl}" CachingEnabled="True" CacheValidity="2.00:00:00"/>
+                                            </Image.Source>
+                                        </Image>
+                                    </Border>
+
+                                    <!-- Título -->
+                                    <Label Grid.Column="1" Text="{Binding Titulo}"
+                                           TextColor="White" FontSize="16" FontAttributes="Bold"
+                                           LineBreakMode="TailTruncation" MaxLines="2"/>
+
+                                    <!-- Bajada -->
+                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding Descripcion}"
+                                           TextColor="#D1D5DB" FontSize="13"
+                                           LineBreakMode="TailTruncation" MaxLines="2"/>
+
+                                    <!-- Meta -->
+                                    <HorizontalStackLayout Grid.Row="2" Grid.Column="1" Spacing="10">
+                                        <Label Text="{Binding Fuente}" TextColor="#9CA3AF" FontSize="12"/>
+                                        <Label Text="{Binding FechaPub, StringFormat='{0:dd/MM HH:mm}'}" TextColor="#9CA3AF" FontSize="12"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </RefreshView>
+    </Grid>
 </ContentPage>
