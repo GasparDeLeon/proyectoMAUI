@@ -11,23 +11,12 @@ public partial class App : Application
 
         Application.Current.UserAppTheme = AppTheme.Dark;
 
-        var hasSession = Preferences.ContainsKey("LoggedUser");
-        MainPage = hasSession
-            ? new AppShell()
-            : new NavigationPage(new LoginPage());
-    }
-
-    // Cierra la sesión borrando las claves
-    private static void ClearSession()
-    {
+        // 🔴 Limpia siempre la sesión al iniciar la app
         Preferences.Remove("LoggedUser");
         Preferences.Remove("LoggedUserId");
+
+        // Siempre arranca en Login
+        MainPage = new NavigationPage(new LoginPage());
     }
 
-    // Se llama cuando la app pasa a background / se detiene
-    protected override void OnSleep()
-    {
-        base.OnSleep();
-        ClearSession();
-    }
 }

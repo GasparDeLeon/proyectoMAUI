@@ -11,7 +11,7 @@ public partial class LoginPage : ContentPage
 {
     private readonly IBiometricAuthService _bio;
     private readonly DatabaseService _db;
-
+    
 
     public LoginPage() : this(
         ServiceHelper.GetService<IBiometricAuthService>(),

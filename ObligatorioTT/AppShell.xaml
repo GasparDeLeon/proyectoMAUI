@@ -19,6 +19,12 @@ Shell.TabBarIsVisible="False" >
                       Title="Inicio"
                       Route="MainPage"
                       ContentTemplate="{DataTemplate local:MainPage}" />
+     
+        <ShellContent x:Name="PerfilItem"
+              Title="Mi perfil"
+              Route="PerfilPage"
+              ContentTemplate="{DataTemplate views:PerfilPage}" />
+
 
         <ShellContent x:Name="ClimaItem"
                       Title="Clima"

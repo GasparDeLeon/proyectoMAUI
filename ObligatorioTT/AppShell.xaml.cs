@@ -49,6 +49,9 @@ namespace ObligatorioTT
             // Normaliza: trae los contenidos conocidos al RootItem sin borrar contenedores
             NormalizeFlyout();
 
+            // Perfil SIEMPRE visible y primero
+            if (PerfilItem != null) PerfilItem.IsVisible = true;
+
             // Inicio siempre visible
             if (InicioItem != null) InicioItem.IsVisible = true;
 
@@ -69,7 +72,9 @@ namespace ObligatorioTT
             // Reordenar en sitio dentro de RootItem (sin .Clear())
             var desired = new List<ShellContent?>
             {
-                InicioItem, ClimaItem, CotizacionesItem, NoticiasItem,
+                PerfilItem, 
+                InicioItem, 
+                ClimaItem, CotizacionesItem, NoticiasItem,
                 PeliculasItem, PatrocinadoresItem, MapaItem
             };
 
@@ -94,16 +99,17 @@ namespace ObligatorioTT
                 target++;
             }
 
-        
+            // ---- función local: trae contenidos conocidos al RootItem, sin borrar contenedores ----
             void NormalizeFlyout()
             {
                 var known = new HashSet<ShellContent?>(new[]
                 {
+                    PerfilItem, // 👈 incluir Perfil en los conocidos
                     InicioItem, ClimaItem, CotizacionesItem, NoticiasItem,
                     PeliculasItem, PatrocinadoresItem, MapaItem
                 });
 
-              
+                // Recorre todos los ShellItem excepto RootItem y trae los contenidos conocidos
                 foreach (var shellItem in this.Items.ToList())
                 {
                     if (shellItem == RootItem) continue;
@@ -124,21 +130,21 @@ namespace ObligatorioTT
             }
         }
 
-  
+        // ---------- Preferencias (modal, desde el footer) ----------
         private async void OnPreferenciasClicked(object sender, EventArgs e)
         {
-            
+            // evita abrir otra preferencia encima si ya hay un modal
             if (Shell.Current?.Navigation?.ModalStack?.Count > 0)
                 return;
 
-            await Shell.Current.GoToAsync(nameof(PreferenciasFlyoutPage), true); 
-            Shell.Current.FlyoutIsPresented = false; 
+            await Shell.Current.GoToAsync(nameof(PreferenciasFlyoutPage), true); // Modal (la página define PresentationMode)
+            Shell.Current.FlyoutIsPresented = false; // cierra el flyout
         }
 
         private void OnPreferenciasFooterTapped(object sender, TappedEventArgs e)
             => OnPreferenciasClicked(sender, EventArgs.Empty);
 
-        
+        // ---------- Cerrar sesión ----------
         private async void OnLogoutClicked(object sender, EventArgs e)
         {
             var confirm = await DisplayAlert("Cerrar sesión", "¿Seguro que querés salir?", "Sí", "No");

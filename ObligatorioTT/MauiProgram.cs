@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
-using Microsoft.Maui.LifecycleEvents;   // 👈 NUEVO: lifecycle hooks
+using Microsoft.Maui.LifecycleEvents;   // lifecycle hooks
 using SQLitePCL;
 
 using ObligatorioTT.Data;
@@ -47,26 +47,38 @@ namespace ObligatorioTT
             // Implementación No-Op del mapa para que Windows no rompa
             builder.Services.AddSingleton<ISponsorMapView, NoOpSponsorMapView>();
 
-            // 🔴 Lifecycle: limpiar sesión al detener/cerrar app
+            // Lifecycle: limpiar sesión solo cuando la app realmente se cierra
             builder.ConfigureLifecycleEvents(events =>
             {
 #if ANDROID
                 events.AddAndroid(android =>
                 {
-                    // Cuando la Activity pasa a background
-                    android.OnStop(activity =>
-                    {
-                        System.Diagnostics.Debug.WriteLine("ANDROID: OnStop -> clear session");
-                        Preferences.Remove("LoggedUser");
-                        Preferences.Remove("LoggedUserId");
-                    });
+                    // ❌ NO limpiar en OnStop / OnPause (se disparan al bloquear pantalla o abrir pickers)
+                    // android.OnStop(...);
+                    // android.OnPause(...);
 
-                    // Cuando la Activity es destruida
+                    // ✅ Solo cuando la Activity es destruida (cierre real / swipe en recientes / matar proceso)
                     android.OnDestroy(activity =>
                     {
-                        System.Diagnostics.Debug.WriteLine("ANDROID: OnDestroy -> clear session");
-                        Preferences.Remove("LoggedUser");
-                        Preferences.Remove("LoggedUserId");
+                        try
+                        {
+                            // Salvavidas para pickers/cámara: si marcaste SkipLogoutOnce, no limpies y consume el flag
+                            var skip = Preferences.Get("SkipLogoutOnce", false);
+                            if (skip)
+                            {
+                                Preferences.Remove("SkipLogoutOnce");
+                                System.Diagnostics.Debug.WriteLine("ANDROID: OnDestroy -> skip logout (picker/camera)");
+                                return;
+                            }
+
+                            System.Diagnostics.Debug.WriteLine("ANDROID: OnDestroy -> clear session");
+                            Preferences.Remove("LoggedUser");
+                            Preferences.Remove("LoggedUserId");
+                        }
+                        catch (System.Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"OnDestroy logout error: {ex}");
+                        }
                     });
                 });
 #endif
