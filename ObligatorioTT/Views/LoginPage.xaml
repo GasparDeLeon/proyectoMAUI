@@ -3,13 +3,115 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.Views.LoginPage"
              Title="Iniciar sesión"
-             BackgroundColor="#1a2332">
-    <VerticalStackLayout Padding="16" Spacing="12">
-        <Entry x:Name="txtUser" Placeholder="Usuario"/>
-        <Entry x:Name="txtPass" Placeholder="Contraseña" IsPassword="True"/>
-        <Button Text="Ingresar" Clicked="BtnIngresar_Clicked"/>
-        <Button Text="Crear cuenta" Clicked="BtnIrRegistro_Clicked"/>
-        <Button Text="Ingresar con huella" Clicked="BtnBio_Clicked" />
+             BackgroundColor="#0b1220">
 
-    </VerticalStackLayout>
+    <Grid>
+        <!-- Fondo gradiente -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0b1220" Offset="0" />
+                    <GradientStop Color="#121a2a" Offset="1" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="18" VerticalOptions="CenterAndExpand">
+                <!-- Card -->
+                <Frame Padding="20" CornerRadius="18" HasShadow="True" BackgroundColor="#111827" Margin="0,12">
+                    <VerticalStackLayout Spacing="14">
+
+                        <!-- Encabezado -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Bienvenido" TextColor="White" FontSize="24" FontAttributes="Bold"/>
+                            <Label Text="Inicia sesión para continuar" TextColor="#9CA3AF" FontSize="13"/>
+                        </VerticalStackLayout>
+
+                        <!-- Usuario -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Usuario" TextColor="#E5E7EB" FontSize="12"/>
+                            <Frame Padding="10" CornerRadius="12" HasShadow="False" BackgroundColor="#0b1220">
+                                <Entry x:Name="txtUser"
+                                       Placeholder="tu_usuario o email"
+                                       TextColor="White"
+                                       PlaceholderColor="#6B7280"
+                                       Keyboard="Email"
+                                       Completed="User_Completed"
+                                       ReturnType="Next"/>
+                            </Frame>
+                        </VerticalStackLayout>
+
+                        <!-- Contraseña -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Contraseña" TextColor="#E5E7EB" FontSize="12"/>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Frame Grid.Column="0" Padding="10" CornerRadius="12" HasShadow="False" BackgroundColor="#0b1220">
+                                    <Entry x:Name="txtPass"
+                                           Placeholder="********"
+                                           TextColor="White"
+                                           PlaceholderColor="#6B7280"
+                                           IsPassword="True"
+                                           Completed="Pass_Completed"
+                                           ReturnType="Go"/>
+                                </Frame>
+                                <Button Grid.Column="1"
+                                        x:Name="btnTogglePass"
+                                        Text="Mostrar"
+                                        Clicked="TogglePassword_Clicked"
+                                        BackgroundColor="#374151"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        Padding="10,6"
+                                        Margin="8,0,0,0"/>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Botón biometría (sin recordarme) -->
+                        <HorizontalStackLayout HorizontalOptions="End">
+                            <Button x:Name="btnBio"
+                                    Text="Ingresar con biometría"
+                                    Clicked="BtnBio_Clicked"
+                                    BackgroundColor="#243B53"
+                                    TextColor="White"
+                                    CornerRadius="10"
+                                    Padding="10,6"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Error inline -->
+                        <Label x:Name="lblError"
+                               Text=""
+                               IsVisible="False"
+                               TextColor="#FCA5A5"
+                               FontSize="12"/>
+
+                        <!-- Botones acción -->
+                        <VerticalStackLayout Spacing="10">
+                            <Button x:Name="btnIngresar"
+                                    Text="Ingresar"
+                                    Clicked="BtnIngresar_Clicked"
+                                    BackgroundColor="#3B82F6"
+                                    TextColor="White"
+                                    CornerRadius="12"
+                                    Padding="14,10"/>
+
+                            <Button Text="Crear cuenta"
+                                    Clicked="BtnIrRegistro_Clicked"
+                                    BackgroundColor="#374151"
+                                    TextColor="White"
+                                    CornerRadius="12"
+                                    Padding="12,8"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Overlay de carga -->
+        <Grid x:Name="busyOverlay"
+              BackgroundColor="#80000000"
+              IsVisible="False">
+            <ActivityIndicator IsRunning="True" IsVisible="True" VerticalOptions="Center" HorizontalOptions="Center" />
+        </Grid>
+    </Grid>
 </ContentPage>

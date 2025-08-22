@@ -10,29 +10,52 @@ namespace ObligatorioTT.Data
     {
         private readonly SQLiteAsyncConnection _db;
 
+        // Se inicializa una sola vez y todos los métodos esperan a esto.
+        private readonly Task _ensureInitTask;
+
         public DatabaseService(string dbPath)
         {
             _db = new SQLiteAsyncConnection(dbPath);
+            _ensureInitTask = EnsureCreatedAndMigrationsAsync();
         }
 
-        /// Crea tablas y deja Email normalizado + único.
-        public async Task InitAsync()
+        /// Crea tablas y deja Email normalizado + único (idempotente).
+        private async Task EnsureCreatedAndMigrationsAsync()
         {
+            // Crea la tabla según el mapeo de la clase (Usuario o [Table("Usuarios")])
             await _db.CreateTableAsync<Usuario>();
-            await EnsureEmailUniquenessAsync();
+
+            // Normalización e índice (probará con nombre singular y plural, sin romper)
+            await NormalizeAndIndexEmailsAsync();
         }
 
-        /// Normaliza, deduplica (conserva menor Id) y crea índice único en Email.
-        private async Task EnsureEmailUniquenessAsync()
+        private async Task NormalizeAndIndexEmailsAsync()
         {
-            // Quitar espacios laterales
-            await _db.ExecuteAsync("UPDATE Usuarios SET Email = trim(Email) WHERE Email IS NOT NULL;");
+            // Ejecuta SQL ignorando "table not found" para dos posibles nombres
+            async Task SafeExecAsync(string sql)
+            {
+                try { await _db.ExecuteAsync(sql); }
+                catch (SQLiteException) { /* ignorar si la tabla con ese nombre no existe */ }
+            }
 
-            // Pasar a minúsculas
-            await _db.ExecuteAsync("UPDATE Usuarios SET Email = lower(Email) WHERE Email IS NOT NULL;");
+            // SINGULAR
+            await SafeExecAsync("UPDATE Usuario   SET Email = trim(Email) WHERE Email IS NOT NULL;");
+            await SafeExecAsync("UPDATE Usuario   SET Email = lower(Email) WHERE Email IS NOT NULL;");
+            await SafeExecAsync(@"
+                DELETE FROM Usuario
+                WHERE Email IS NOT NULL AND Email <> ''
+                  AND Id NOT IN (
+                    SELECT MIN(Id)
+                    FROM Usuario
+                    WHERE Email IS NOT NULL AND Email <> ''
+                    GROUP BY Email
+                  );");
+            await SafeExecAsync(@"CREATE UNIQUE INDEX IF NOT EXISTS UX_Usuario_Email ON Usuario (Email);");
 
-            // Eliminar duplicados exactos (mantener menor Id por Email)
-            await _db.ExecuteAsync(@"
+            // PLURAL (por si el modelo tiene [Table("Usuarios")])
+            await SafeExecAsync("UPDATE Usuarios  SET Email = trim(Email) WHERE Email IS NOT NULL;");
+            await SafeExecAsync("UPDATE Usuarios  SET Email = lower(Email) WHERE Email IS NOT NULL;");
+            await SafeExecAsync(@"
                 DELETE FROM Usuarios
                 WHERE Email IS NOT NULL AND Email <> ''
                   AND Id NOT IN (
@@ -40,14 +63,8 @@ namespace ObligatorioTT.Data
                     FROM Usuarios
                     WHERE Email IS NOT NULL AND Email <> ''
                     GROUP BY Email
-                  );
-            ");
-
-            // Índice único
-            await _db.ExecuteAsync(@"
-                CREATE UNIQUE INDEX IF NOT EXISTS UX_Usuarios_Email
-                ON Usuarios (Email);
-            ");
+                  );");
+            await SafeExecAsync(@"CREATE UNIQUE INDEX IF NOT EXISTS UX_Usuarios_Email ON Usuarios (Email);");
         }
 
         /// Normalización previa a guardar
@@ -67,6 +84,7 @@ namespace ObligatorioTT.Data
         /// Inserta con validación de email único (recomendado)
         public async Task<(bool ok, string? error)> RegistrarUsuarioAsync(Usuario u)
         {
+            await _ensureInitTask;           // <-- garantiza tabla lista
             NormalizeUsuario(u);
 
             if (string.IsNullOrWhiteSpace(u.Email))
@@ -106,6 +124,7 @@ namespace ObligatorioTT.Data
         /// Actualiza un usuario validando que el email no choque con otro usuario
         public async Task<(bool ok, string? error)> ActualizarUsuarioAsync(Usuario u)
         {
+            await _ensureInitTask;           // <-- garantiza tabla lista
             NormalizeUsuario(u);
 
             if (string.IsNullOrWhiteSpace(u.Email))
@@ -142,29 +161,39 @@ namespace ObligatorioTT.Data
             return 1;
         }
 
-        public Task<int> DeleteUsuarioAsync(Usuario u) => _db.DeleteAsync(u);
+        public async Task<int> DeleteUsuarioAsync(Usuario u)
+        {
+            await _ensureInitTask;
+            return await _db.DeleteAsync(u);
+        }
 
         // ========================= Consultas =========================
 
-        public Task<Usuario?> GetUsuarioByUserAsync(string userName)
+        public async Task<Usuario?> GetUsuarioByUserAsync(string userName)
         {
-            // Normalizar ANTES de armar la expresión (evita 'Cannot get SQL for: Coalesce')
+            await _ensureInitTask;           // <-- garantiza tabla lista
             var u = (userName ?? string.Empty).Trim();
-            return _db.Table<Usuario>()
-                      .Where(x => x.UserName == u)
-                      .FirstOrDefaultAsync();
+            return await _db.Table<Usuario>()
+                            .Where(x => x.UserName == u)
+                            .FirstOrDefaultAsync();
         }
 
-        public Task<Usuario?> GetUsuarioByEmailAsync(string emailNormalizado)
+        public async Task<Usuario?> GetUsuarioByEmailAsync(string emailNormalizado)
         {
-            // Normalizar ANTES de armar la expresión
+            await _ensureInitTask;           // <-- garantiza tabla lista
             var e = (emailNormalizado ?? string.Empty).Trim().ToLowerInvariant();
-            return _db.Table<Usuario>()
-                      .Where(x => x.Email == e)
-                      .FirstOrDefaultAsync();
+            return await _db.Table<Usuario>()
+                            .Where(x => x.Email == e)
+                            .FirstOrDefaultAsync();
         }
 
-        public Task<List<Usuario>> GetUsuariosAsync() =>
-            _db.Table<Usuario>().ToListAsync();
+        public async Task<List<Usuario>> GetUsuariosAsync()
+        {
+            await _ensureInitTask;           // <-- garantiza tabla lista
+            return await _db.Table<Usuario>().ToListAsync();
+        }
+
+        // ====== Compatibilidad con tu API pública previa ======
+        public Task InitAsync() => _ensureInitTask; // por si la llamaban desde App.xaml.cs
     }
 }

@@ -5,53 +5,128 @@
              Title="Clima en Punta del Este"
              BackgroundColor="{StaticResource FondoOscuro}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid>
+        <!-- Fondo gradiente -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0b1220" Offset="0" />
+                    <GradientStop Color="#121a2a" Offset="1" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
-            <Label Text="Clima actual"
-                   Style="{StaticResource Headline}"
-                   HorizontalOptions="Center" />
+        <!-- Pull to refresh -->
+        <RefreshView Refreshing="RefreshView_Refreshing">
+            <ScrollView>
+                <VerticalStackLayout Padding="20" Spacing="16">
 
-            <Frame BackgroundColor="{StaticResource AzulPrincipal}"
-                   CornerRadius="12"
-                   Padding="15"
-                   Margin="0,10">
-                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <Label x:Name="lblFechaActual" Text="..." Style="{StaticResource SubHeadline}" />
-                    <Image x:Name="imgIconoActual" HeightRequest="60" WidthRequest="60" />
-                    <Label x:Name="lblTempActual" Text="..." Style="{StaticResource DescriptionText}" />
-                    <Label x:Name="lblDescripcionActual" Text="..." Style="{StaticResource DescriptionText}" />
-                </VerticalStackLayout>
-            </Frame>
+                    <!-- Encabezado -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                        <Label Text="Clima actual"
+           Style="{StaticResource Headline}"
+           Grid.ColumnSpan="2"/>
+                        <Label x:Name="lblActualizado"
+           Grid.Row="1"
+           Text="Actualizado: -"
+           Style="{StaticResource DescriptionText}"
+           TextColor="#9CA3AF"/>
+                    </Grid>
 
-            <Label Text="Pronóstico próximos 5 días"
-                   Style="{StaticResource Headline}"
-                   HorizontalOptions="Center" />
 
-            <CollectionView x:Name="climaCollection"
-                            ItemsLayout="HorizontalList"
-                            HeightRequest="200">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame BackgroundColor="{StaticResource AzulPrincipal}"
-                               CornerRadius="10"
-                               Padding="10"
-                               Margin="5"
-                               WidthRequest="140">
-                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                                <Label Text="{Binding Fecha}" Style="{StaticResource SubHeadline}" />
-                                <Image Source="{Binding Icono}" HeightRequest="50" WidthRequest="50" />
-                                <Label Text="{Binding Temperatura, StringFormat='{}{0} °C'}" Style="{StaticResource DescriptionText}" />
-                                <Label Text="{Binding Descripcion}" FontSize="12" HorizontalTextAlignment="Center" TextColor="White" />
+                    <!-- Card clima actual -->
+                    <Frame BackgroundColor="{StaticResource AzulPrincipal}"
+                           CornerRadius="14"
+                           Padding="16"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Image x:Name="imgIconoActual"
+                                   HeightRequest="72"
+                                   WidthRequest="72"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center" />
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <!-- Se setea por código con :0 -->
+                                <Label x:Name="lblTempActual"
+                                       Text="-- °C"
+                                       FontSize="36"
+                                       FontAttributes="Bold"
+                                       TextColor="White"/>
+                                <Label x:Name="lblDescripcionActual"
+                                       Text="--"
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="White"/>
+                                <Label x:Name="lblFechaActual"
+                                       Text="--"
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="#E5E7EB"/>
                             </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                        </Grid>
+                    </Frame>
 
+                    <!-- Título pronóstico -->
+                    <Label Text="Pronóstico próximos 5 días"
+                           Style="{StaticResource Headline}"
+                           HorizontalOptions="Center" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+                    <!-- Forecast horizontal -->
+                    <CollectionView x:Name="climaCollection"
+                                    HeightRequest="210"
+                                    ItemsUpdatingScrollMode="KeepScrollOffset">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout Padding="24" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="No hay datos de pronóstico disponibles."
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="#9CA3AF"/>
+                                <Button Text="Reintentar" Clicked="Reintentar_Clicked"
+                                        BackgroundColor="#334155" TextColor="White" CornerRadius="10" Padding="10,6"/>
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="{StaticResource AzulPrincipal}"
+                                       CornerRadius="12"
+                                       Padding="12"
+                                       Margin="2"
+                                       WidthRequest="140"
+                                       HasShadow="True">
+                                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                        <Label Text="{Binding Fecha}"
+                                               Style="{StaticResource SubHeadline}"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="White"/>
+                                        <Image Source="{Binding Icono}"
+                                               HeightRequest="56"
+                                               WidthRequest="56"/>
+                                        <!-- Sin decimales en el pronóstico -->
+                                        <Label Text="{Binding Temperatura, StringFormat='{}{0:0} °C'}"
+                                               Style="{StaticResource DescriptionText}"
+                                               TextColor="White"/>
+                                        <Label Text="{Binding Descripcion}"
+                                               FontSize="12"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="White"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <!-- Overlay de carga -->
+        <Grid x:Name="busyOverlay"
+              BackgroundColor="#80000000"
+              IsVisible="False">
+            <ActivityIndicator IsRunning="True" IsVisible="True" VerticalOptions="Center" HorizontalOptions="Center" />
+        </Grid>
+    </Grid>
 </ContentPage>
-  
-    
