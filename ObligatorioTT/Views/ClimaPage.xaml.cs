@@ -1,5 +1,6 @@
 using Microsoft.Maui.Controls;
 using ObligatorioTT.Services;
+using System;
 
 namespace ObligatorioTT.Views
 {
@@ -26,6 +27,24 @@ namespace ObligatorioTT.Views
             busyOverlay.IsVisible = on;
         }
 
+        // --- Normaliza el icono a URL HTTPS válida (acepta "10d" o http://...) ---
+        private static string ToIconUrl(string? iconOrUrl)
+        {
+            if (string.IsNullOrWhiteSpace(iconOrUrl)) return "";
+
+            // ¿Ya es URL?
+            if (Uri.TryCreate(iconOrUrl, UriKind.Absolute, out var u))
+            {
+                // Forzar https si vino con http
+                if (u.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase))
+                    return "https" + iconOrUrl.Substring(4);
+                return iconOrUrl;
+            }
+
+            // Si vino solo el código (p.ej. "10d")
+            return $"https://openweathermap.org/img/wn/{iconOrUrl}@2x.png";
+        }
+
         private async Task CargarClimaAsync()
         {
             if (_isBusy) return;
@@ -36,13 +55,39 @@ namespace ObligatorioTT.Views
 
                 // Clima actual
                 var climaActual = await OpenWeatherService.ObtenerClimaActualAsync();
+
                 lblFechaActual.Text = climaActual.Fecha;
                 lblTempActual.Text = $"{climaActual.Temperatura:0} °C"; // <-- sin decimales
                 lblDescripcionActual.Text = climaActual.Descripcion;
-                imgIconoActual.Source = climaActual.Icono;
+
+                // Icono actual: forzar URL https y cache
+                var iconUrl = ToIconUrl(climaActual.Icono);
+                imgIconoActual.Source = new UriImageSource
+                {
+                    Uri = string.IsNullOrWhiteSpace(iconUrl) ? null : new Uri(iconUrl),
+                    CachingEnabled = true,
+                    CacheValidity = TimeSpan.FromHours(6)
+                };
 
                 // Pronóstico
                 var pronostico = await OpenWeatherService.ObtenerPronosticoAsync();
+
+                // Normalizar iconos del pronóstico (HTTPS / código -> URL)
+                if (pronostico != null)
+                {
+                    foreach (var item in pronostico)
+                    {
+                        // Asumimos que el modelo tiene propiedad Icono settable
+                        var tipo = item.GetType();
+                        var prop = tipo.GetProperty("Icono");
+                        if (prop != null && prop.CanWrite)
+                        {
+                            var val = prop.GetValue(item) as string;
+                            prop.SetValue(item, ToIconUrl(val));
+                        }
+                    }
+                }
+
                 climaCollection.ItemsSource = pronostico;
 
                 // Última actualización
