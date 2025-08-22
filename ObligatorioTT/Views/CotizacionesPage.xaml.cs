@@ -45,8 +45,8 @@ public partial class CotizacionesPage : ContentPage
             spinner.IsVisible = spinner.IsRunning = true;
 
             // Plan free de CurrencyLayer => usar http
-            const string accessKey = "56b50286bf0f1c812248d1adc9622d57";
-            string url = $"http://api.currencylayer.com/live?access_key={accessKey}&currencies=UYU,EUR,BRL&format=1";
+            const string accessKey = "507ee1905a93063864b39e802e1dee7d";
+            string url = $"https://api.currencylayer.com/live?access_key={accessKey}&currencies=UYU,EUR,BRL&format=1";
 
             var response = await _http.GetStringAsync(url, _cts.Token);
             var json = JObject.Parse(response);
