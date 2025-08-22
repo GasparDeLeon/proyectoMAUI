@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.Maui.Controls;        // Shell, ShellContent, DisplayAlert, TappedEventArgs, NavigationPage
-using Microsoft.Maui.Storage;         // Preferences
+using Microsoft.Maui.Controls;        
+using Microsoft.Maui.Storage;       
 
-using ObligatorioTT.Services;         // FlyoutPreferences
-using ObligatorioTT.Views;            // LoginPage, PreferenciasFlyoutPage, etc.
+using ObligatorioTT.Services;        
+using ObligatorioTT.Views;           
 
 namespace ObligatorioTT
 {
@@ -16,46 +16,38 @@ namespace ObligatorioTT
         {
             InitializeComponent();
 
-            // Rutas SOLO para páginas que NO están directamente en el Flyout
             Routing.RegisterRoute(nameof(SponsorFormPage), typeof(SponsorFormPage));
             Routing.RegisterRoute(nameof(PreferenciasFlyoutPage), typeof(PreferenciasFlyoutPage));
+            Routing.RegisterRoute(nameof(SponsorsPage), typeof(SponsorsPage));
+
+
 
 #if ANDROID
             // Ruta SOLO Android: selector de pin en mapa
             Routing.RegisterRoute("PinPickerPage", typeof(PinPickerPage));
 #endif
 
-            // Suscribo antes de aplicar (si ya hay preferencias persistidas)
             FlyoutPreferences.PreferencesChanged += () =>
             {
-                // Asegura ejecutar en hilo de UI
                 if (Dispatcher != null)
                     Dispatcher.Dispatch(ApplyFlyoutVisibility);
                 else
                     ApplyFlyoutVisibility();
             };
 
-            // Aplico visibilidad inicial según preferencias guardadas
             ApplyFlyoutVisibility();
         }
 
-        /// <summary>
-        /// Aplica visibilidad y orden de los items del Flyout según preferencias.
-        /// </summary>
         private void ApplyFlyoutVisibility()
         {
             if (RootItem == null) return;
 
-            // Normaliza: trae los contenidos conocidos al RootItem sin borrar contenedores
             NormalizeFlyout();
 
-            // Perfil SIEMPRE visible y primero
             if (PerfilItem != null) PerfilItem.IsVisible = true;
 
-            // Inicio siempre visible
             if (InicioItem != null) InicioItem.IsVisible = true;
 
-            // Visibilidad según preferencias (con true por defecto)
             if (ClimaItem != null)
                 ClimaItem.IsVisible = FlyoutPreferences.Get(FlyoutPreferences.ShowClima, true);
             if (CotizacionesItem != null)
@@ -69,11 +61,10 @@ namespace ObligatorioTT
             if (MapaItem != null)
                 MapaItem.IsVisible = FlyoutPreferences.Get(FlyoutPreferences.ShowMapa, true);
 
-            // Reordenar en sitio dentro de RootItem (sin .Clear())
             var desired = new List<ShellContent?>
             {
-                PerfilItem, 
-                InicioItem, 
+                InicioItem,
+                PerfilItem,  
                 ClimaItem, CotizacionesItem, NoticiasItem,
                 PeliculasItem, PatrocinadoresItem, MapaItem
             };
@@ -91,7 +82,6 @@ namespace ObligatorioTT
                 }
                 else if (current != target)
                 {
-                    // Mover conservando el orden
                     RootItem.Items.RemoveAt(current);
                     if (target >= RootItem.Items.Count) RootItem.Items.Add(item);
                     else RootItem.Items.Insert(target, item);
@@ -99,17 +89,15 @@ namespace ObligatorioTT
                 target++;
             }
 
-            // ---- función local: trae contenidos conocidos al RootItem, sin borrar contenedores ----
             void NormalizeFlyout()
             {
                 var known = new HashSet<ShellContent?>(new[]
                 {
-                    PerfilItem, // 👈 incluir Perfil en los conocidos
+                    PerfilItem,
                     InicioItem, ClimaItem, CotizacionesItem, NoticiasItem,
                     PeliculasItem, PatrocinadoresItem, MapaItem
                 });
 
-                // Recorre todos los ShellItem excepto RootItem y trae los contenidos conocidos
                 foreach (var shellItem in this.Items.ToList())
                 {
                     if (shellItem == RootItem) continue;
@@ -130,21 +118,18 @@ namespace ObligatorioTT
             }
         }
 
-        // ---------- Preferencias (modal, desde el footer) ----------
         private async void OnPreferenciasClicked(object sender, EventArgs e)
         {
-            // evita abrir otra preferencia encima si ya hay un modal
             if (Shell.Current?.Navigation?.ModalStack?.Count > 0)
                 return;
 
-            await Shell.Current.GoToAsync(nameof(PreferenciasFlyoutPage), true); // Modal (la página define PresentationMode)
-            Shell.Current.FlyoutIsPresented = false; // cierra el flyout
+            await Shell.Current.GoToAsync(nameof(PreferenciasFlyoutPage), true);
+            Shell.Current.FlyoutIsPresented = false;
         }
 
         private void OnPreferenciasFooterTapped(object sender, TappedEventArgs e)
             => OnPreferenciasClicked(sender, EventArgs.Empty);
 
-        // ---------- Cerrar sesión ----------
         private async void OnLogoutClicked(object sender, EventArgs e)
         {
             var confirm = await DisplayAlert("Cerrar sesión", "¿Seguro que querés salir?", "Sí", "No");

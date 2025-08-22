@@ -48,8 +48,8 @@ Shell.TabBarIsVisible="False" >
 
         <ShellContent x:Name="PatrocinadoresItem"
                       Title="Patrocinadores"
-                      Route="SponsorsPage"
-                      ContentTemplate="{DataTemplate views:SponsorsPage}" />
+                      Route="PatrocinadoresPage"
+                      ContentTemplate="{DataTemplate views:PatrocinadoresPage}" />
 
         <ShellContent x:Name="MapaItem"
                       Title="Mapa"

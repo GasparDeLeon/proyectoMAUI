@@ -67,7 +67,7 @@ namespace ObligatorioTT
             catch (Exception ex)
             {
                 Debug.WriteLine($"[MainPage.ActualizarBienvenidaAsync] {ex}");
-                // Silencioso para no molestar al usuario en la Home
+                
             }
         }
     }
