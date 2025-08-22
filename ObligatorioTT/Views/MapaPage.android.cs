@@ -2,40 +2,38 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.Maui.Controls;
+using System.Threading.Tasks;
+using Microsoft.Maui.Devices.Sensors; // Location
 using ObligatorioTT.Models;
 using ObligatorioTT.Services;
 
-// Alias para separar namespaces de Maps
+// Alias para Maps (usamos el control de MAUI)
 using ControlsMaps = Microsoft.Maui.Controls.Maps;
 using MauiMaps = Microsoft.Maui.Maps;
 
-using Microsoft.Maui.Devices.Sensors; // Location
-
 namespace ObligatorioTT.Views
 {
-    // Esta clase complementa tu MapaPage existente SOLO en Android
-    public partial class MapaPage : ContentPage
+    /// <summary>
+    /// Helper específico de Android para cargar pines de sponsors en un Map ya existente.
+    /// </summary>
+    internal static class MapaPageAndroidHelpers
     {
-        private ControlsMaps.Map _map;
-
-        protected override async void OnAppearing()
+        /// <summary>
+        /// Carga pines de sponsors en el mapa. Si adjustCamera=true, además encuadra para verlos a todos.
+        /// </summary>
+        public static async Task LoadSponsorPinsAsync(ControlsMaps.Map map, bool adjustCamera = false)
         {
-            base.OnAppearing();
+            if (map == null) return;
 
             await SponsorRepository.Inst.InitAsync();
             var sponsors = await SponsorRepository.Inst.GetAllAsync();
 
-            // Mapa a pantalla completa
-            _map = new ControlsMaps.Map
-            {
-                MapType = MauiMaps.MapType.Street,
-                IsShowingUser = false,
-                VerticalOptions = LayoutOptions.FillAndExpand
-            };
+            // Limpiar pines existentes de sponsors (dejamos el pin del usuario si existe)
+            // Tip: si querés diferenciar, podrías usar Pin.Type o Label prefix para filtrar.
+            var toRemove = map.Pins.Where(p => p != null && (p.Label != "Estás aquí")).ToList();
+            foreach (var p in toRemove)
+                map.Pins.Remove(p);
 
-            // Limpia pines y agrega los de sponsors con coordenadas
-            _map.Pins.Clear();
             var coords = new List<Location>();
 
             foreach (var s in sponsors)
@@ -53,12 +51,11 @@ namespace ObligatorioTT.Views
                         Type = ControlsMaps.PinType.Place
                     };
 
-                    _map.Pins.Add(pin);
+                    map.Pins.Add(pin);
                 }
             }
 
-            // Encadre para ver todos los pines
-            if (coords.Count > 0)
+            if (adjustCamera && coords.Count > 0)
             {
                 double minLat = coords.Min(l => l.Latitude);
                 double maxLat = coords.Max(l => l.Latitude);
@@ -70,22 +67,13 @@ namespace ObligatorioTT.Views
                     (minLng + maxLng) / 2.0
                 );
 
-                // Calcular radio aprox en metros (con pequeño margen)
+                // Radio aprox en metros (con margen)
                 double latMeters = 111_000 * Math.Max(0.000001, (maxLat - minLat));
                 double lngMeters = 111_000 * Math.Cos(center.Latitude * Math.PI / 180.0) * Math.Max(0.000001, (maxLng - minLng));
                 double radiusMeters = Math.Max(latMeters, lngMeters) / 2.0 + 500;
 
-                _map.MoveToRegion(MauiMaps.MapSpan.FromCenterAndRadius(center, MauiMaps.Distance.FromMeters(Math.Max(500, radiusMeters))));
+                map.MoveToRegion(MauiMaps.MapSpan.FromCenterAndRadius(center, MauiMaps.Distance.FromMeters(Math.Max(500, radiusMeters))));
             }
-            else
-            {
-                // Fallback (Maldonado aprox)
-                var center = new Location(-34.9, -54.95);
-                _map.MoveToRegion(MauiMaps.MapSpan.FromCenterAndRadius(center, MauiMaps.Distance.FromKilometers(5)));
-            }
-
-            // Reemplaza el contenido de la página por el mapa (solo Android)
-            Content = _map;
         }
     }
 }

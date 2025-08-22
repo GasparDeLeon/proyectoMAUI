@@ -19,6 +19,12 @@ Shell.TabBarIsVisible="False" >
                       Title="Inicio"
                       Route="MainPage"
                       ContentTemplate="{DataTemplate local:MainPage}" />
+     
+        <ShellContent x:Name="PerfilItem"
+              Title="Mi perfil"
+              Route="PerfilPage"
+              ContentTemplate="{DataTemplate views:PerfilPage}" />
+
 
         <ShellContent x:Name="ClimaItem"
                       Title="Clima"
@@ -42,8 +48,8 @@ Shell.TabBarIsVisible="False" >
 
         <ShellContent x:Name="PatrocinadoresItem"
                       Title="Patrocinadores"
-                      Route="SponsorsPage"
-                      ContentTemplate="{DataTemplate views:SponsorsPage}" />
+                      Route="PatrocinadoresPage"
+                      ContentTemplate="{DataTemplate views:PatrocinadoresPage}" />
 
         <ShellContent x:Name="MapaItem"
                       Title="Mapa"

@@ -137,19 +137,42 @@ namespace ObligatorioTT.Views
             });
         }
 
-        private async void OnGuardarUbicacion(object? sender, EventArgs e)
-        {
-            if (_sponsor is null || _pinActual is null) return;
+   private async void OnGuardarUbicacion(object? sender, EventArgs e)
+{
+    if (_sponsor is null || _pinActual is null) return;
 
-            _sponsor.Latitud = _pinActual.Location.Latitude;
-            _sponsor.Longitud = _pinActual.Location.Longitude;
+    try
+    {
+        _btnGuardar.IsEnabled = false;
 
-            await SponsorRepository.Inst.UpdateAsync(_sponsor);
+        _sponsor.Latitud  = _pinActual.Location.Latitude;
+        _sponsor.Longitud = _pinActual.Location.Longitude;
 
-            await DisplayAlert("OK", "Ubicación guardada", "Cerrar");
+        await SponsorRepository.Inst.UpdateAsync(_sponsor);
 
-            await Shell.Current.GoToAsync("//SponsorsPage");
-        }
+        // Confirmación
+        await DisplayAlert("OK", "Ubicación guardada.", "Cerrar");
+
+        // 1) Ir al root de Patrocinadores para resetear su stack
+        await Shell.Current.GoToAsync("//PatrocinadoresPage");
+
+        // (opcional, por si hubiera subpáginas colgadas): limpiar stack
+        await Shell.Current.Navigation.PopToRootAsync(false);
+
+        // 2) Ir a Inicio
+        await Shell.Current.GoToAsync("//MainPage");
+    }
+    catch (Exception ex)
+    {
+        await DisplayAlert("Error", $"No se pudo guardar la ubicación.\n{ex.Message}", "Cerrar");
+    }
+    finally
+    {
+        _btnGuardar.IsEnabled = true;
+    }
+}
+
+
     }
 }
 #endif

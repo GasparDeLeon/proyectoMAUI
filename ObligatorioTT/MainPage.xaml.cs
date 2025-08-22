@@ -1,40 +1,74 @@
-﻿using Microsoft.Maui.Media;
-using System.Text.Json;
+﻿using System;
+using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
-namespace ObligatorioTT
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;          // Preferences
+using ObligatorioTT.Data;              // DatabaseService
+using ObligatorioTT.Models;            // Usuario
+using ObligatorioTT.Helpers;           // ServiceHelper
 
+namespace ObligatorioTT
 {
     public partial class MainPage : ContentPage
     {
-        
-        int count = 0;
+        private readonly DatabaseService _db;
 
         public MainPage()
         {
             try
             {
                 InitializeComponent();
-
-                //List<String> list = new List<String>();
-                //list.Add("Esto es una lista");
-                //list.Add("o no es una lista?");
-                //list.Add("si era");
-
-                //string filename = FileSystem.AppDataDirectory + "/ArchivoJson.json";
-                //var serializedData = JsonSerializer.Serialize(list);
-                //File.WriteAllText(filename, serializedData);
-
-                //var rawData = File.ReadAllText(filename);
-                //var listaDez = JsonSerializer.Deserialize<List<String>>(rawData);
+                _db = ServiceHelper.GetService<DatabaseService>();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("ERROR en MainPage: " + ex.Message);
                 Console.WriteLine(ex.StackTrace);
-                throw; 
+                throw;
             }
         }
 
-    }
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await ActualizarBienvenidaAsync();
+        }
 
+        private async Task ActualizarBienvenidaAsync()
+        {
+            try
+            {
+                var userId = Preferences.Get("LoggedUserId", 0);
+                Usuario? usuario = null;
+
+                if (userId > 0)
+                {
+                    // Usamos el método que ya tenés: GetUsuariosAsync + FirstOrDefault
+                    var lista = await _db.GetUsuariosAsync();
+                    usuario = lista.FirstOrDefault(u => u.Id == userId);
+                }
+
+                if (usuario == null)
+                {
+                    var userName = Preferences.Get("LoggedUser", string.Empty);
+                    if (!string.IsNullOrWhiteSpace(userName))
+                    {
+                        // Fallback por username si hiciera falta
+                        usuario = await _db.GetUsuarioByUserAsync(userName);
+                    }
+                }
+
+                if (usuario != null && this.FindByName<Label>("lblBienvenida") is Label lbl)
+                {
+                    lbl.Text = $"Bienvenido, {usuario.NombreCompleto}";
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainPage.ActualizarBienvenidaAsync] {ex}");
+                
+            }
+        }
+    }
 }

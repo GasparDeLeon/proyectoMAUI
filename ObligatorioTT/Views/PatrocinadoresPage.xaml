@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ObligatorioTT.Views.PatrocinadoresPage"
+             Title="Patrocinadores"
+             BackgroundColor="#1a2332">
+
+    <ContentPage.Resources>
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="White"/>
+        </Style>
+        <Style TargetType="Frame">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="HasShadow" Value="True"/>
+            <Setter Property="Margin" Value="10,6"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="BackgroundColor" Value="#22324a"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="12" Spacing="12">
+
+        <!-- Botón para abrir la página de gestión -->
+        <Button Text="Gestionar patrocinadores"
+                HorizontalOptions="Center"
+                Padding="14,8"
+                Clicked="OnGestionarClicked" />
+
+        <CollectionView x:Name="cvSponsors"
+                        ItemsLayout="VerticalList"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame>
+                        <Grid ColumnDefinitions="100,*,Auto"
+                              RowDefinitions="Auto,Auto,Auto"
+                              ColumnSpacing="12" RowSpacing="6">
+
+                            <!-- Logo -->
+                            <Image Grid.RowSpan="3" Grid.Column="0"
+                                   Source="{Binding LogoPath}"
+                                   Aspect="AspectFill"
+                                   HeightRequest="80" WidthRequest="80"
+                                   BackgroundColor="#0f1724"
+                                   Margin="0" />
+
+                            <!-- Nombre -->
+                            <Label Grid.Column="1" Grid.Row="0"
+                                   Text="{Binding Nombre}"
+                                   FontSize="18" FontAttributes="Bold"/>
+
+                            <!-- Dirección -->
+                            <Label Grid.Column="1" Grid.Row="1"
+                                   Text="{Binding Direccion}"
+                                   FontSize="14" Opacity="0.9"/>
+
+                    
+                            <!-- Botón mapa: visible solo en Android -->
+                            <Button Grid.Column="2" Grid.Row="0"
+                                    Text="Ver en mapa"
+                                    Padding="12,6"
+                                    Clicked="OnAbrirMapaClicked"
+                                    IsVisible="{OnPlatform Android=true, WinUI=false, iOS=false, MacCatalyst=false}" />
+
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+</ContentPage>

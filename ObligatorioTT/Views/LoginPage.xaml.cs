@@ -1,4 +1,7 @@
+using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.ApplicationModel; // DeviceInfo
 using ObligatorioTT.Data;

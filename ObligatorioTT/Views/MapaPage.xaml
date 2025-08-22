@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
-             x:Class="ObligatorioTT.Views.MapaPage"
-             Title="Mapa">
-    <maps:Map x:Name="map" MapType="Street"/>
+<ContentPage
+    x:Class="ObligatorioTT.Views.MapaPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+    Title="Mapa">
+
+    <ContentPage.ToolbarItems>
+        <!-- Botón para centrar el mapa en la ubicación actual -->
+        <ToolbarItem Text="Centrar" Clicked="Recenter_Clicked" />
+    </ContentPage.ToolbarItems>
+
+    <!-- Mapa MAUI: muestra la ubicación del usuario (punto azul) -->
+    <maps:Map
+        x:Name="map"
+        MapType="Street"
+        IsShowingUser="True" />
 </ContentPage>

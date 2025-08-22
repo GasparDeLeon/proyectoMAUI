@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Storage;
+﻿using Microsoft.Maui.Storage;          // Preferences
 using ObligatorioTT.Views;
 
 namespace ObligatorioTT;
@@ -9,13 +9,14 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        var hasSession = Preferences.ContainsKey("LoggedUser");
         Application.Current.UserAppTheme = AppTheme.Dark;
 
+        // 🔴 Limpia siempre la sesión al iniciar la app
+        Preferences.Remove("LoggedUser");
+        Preferences.Remove("LoggedUserId");
 
-
-        MainPage = hasSession
-            ? new AppShell()
-            : new NavigationPage(new LoginPage());
+        // Siempre arranca en Login
+        MainPage = new NavigationPage(new LoginPage());
     }
+
 }
