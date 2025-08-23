@@ -46,8 +46,7 @@
 
 
 		<!-- Publica banderas con alias 'flags/...' para poder usar Source="flags/us.png" -->
-		<MauiImage Update="Resources\Images\flags\*.png"
-				   LogicalName="flags/%(Filename)%(Extension)" />
+		<MauiImage Update="Resources\Images\flags\*.png" LogicalName="flags/%(Filename)%(Extension)" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />

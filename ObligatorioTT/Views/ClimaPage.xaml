@@ -19,106 +19,178 @@
         <!-- Pull to refresh -->
         <RefreshView Refreshing="RefreshView_Refreshing">
             <ScrollView>
-                <!-- CONTENEDOR CENTRADO con ancho máximo según dispositivo -->
-                <VerticalStackLayout
-            Padding="20"
-            Spacing="16"
-            HorizontalOptions="Center"
-            MaximumWidthRequest="{OnIdiom Phone=520, Tablet=800, Desktop=960}">
+                <!-- Contenedor centrado con ancho máximo -->
+                <VerticalStackLayout Padding="20"
+                                     Spacing="16"
+                                     HorizontalOptions="Center"
+                                     MaximumWidthRequest="{OnIdiom Phone=520, Tablet=800, Desktop=1024}">
 
                     <!-- Encabezado -->
-                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Padding="0,6,0,0">
                         <Label Text="Clima actual"
-                   Style="{StaticResource Headline}"
-                   Grid.ColumnSpan="2"/>
-                        <Label x:Name="lblActualizado"
-                   Grid.Row="1"
-                   Text="Actualizado: -"
-                   Style="{StaticResource DescriptionText}"
-                   TextColor="#9CA3AF"/>
+                               Grid.ColumnSpan="2"
+                               Style="{StaticResource Headline}" />
+
+                        <!-- Chip “Actualizado” (no full width) -->
+                        <Frame Grid.Row="1" Grid.Column="0"
+                               Padding="10,4"
+                               BackgroundColor="#223043"
+                               CornerRadius="12"
+                               HasShadow="False"
+                               HorizontalOptions="Start"
+                               MaximumWidthRequest="340">
+                            <HorizontalStackLayout Spacing="6">
+                                <Label x:Name="lblActualizado"
+                                       Text="Actualizado: -"
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="#B8C3CF" />
+                            </HorizontalStackLayout>
+                        </Frame>
                     </Grid>
 
-                    <!-- Card clima actual (queda centrada por el contenedor) -->
+                    <!-- Card clima actual -->
                     <Frame BackgroundColor="{StaticResource AzulPrincipal}"
-                 CornerRadius="14"
-                 Padding="16"
-                 HasShadow="True"
-                 HorizontalOptions="FillAndExpand">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                           CornerRadius="18"
+                           Padding="18"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="14" RowSpacing="6">
+
+                            <!-- Ícono -->
                             <Image x:Name="imgIconoActual"
-                     HeightRequest="72"
-                     WidthRequest="72"
-                     VerticalOptions="Center"
-                     HorizontalOptions="Center" />
-                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                   Grid.RowSpan="2"
+                                   HeightRequest="72" WidthRequest="72"
+                                   VerticalOptions="Center" HorizontalOptions="Center"/>
+
+                            <!-- Temperatura y descripción -->
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                 <Label x:Name="lblTempActual"
-                       Text="-- °C"
-                       FontSize="36"
-                       FontAttributes="Bold"
-                       TextColor="White"/>
+                                       Text="-- °C"
+                                       FontSize="42"
+                                       FontAttributes="Bold"
+                                       TextColor="White"/>
                                 <Label x:Name="lblDescripcionActual"
-                       Text="--"
-                       Style="{StaticResource DescriptionText}"
-                       TextColor="White"/>
-                                <Label x:Name="lblFechaActual"
-                       Text="--"
-                       Style="{StaticResource DescriptionText}"
-                       TextColor="#E5E7EB"/>
+                                       Text="--"
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="#E5E7EB"/>
                             </VerticalStackLayout>
+
+                            <!-- Fecha alineada a la derecha -->
+                            <Label x:Name="lblFechaActual"
+                                   Grid.Column="2"
+                                   Text="--"
+                                   Style="{StaticResource DescriptionText}"
+                                   TextColor="#C7D2FE"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="End"/>
+
+                            <!-- Máx / Mín -->
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="14">
+                                <Frame Padding="10,6" BackgroundColor="#1b2638" CornerRadius="10" HasShadow="False">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="Máx" TextColor="#9CA3AF" FontSize="12"/>
+                                        <Label x:Name="lblMax" Text="-- °C" TextColor="White" FontAttributes="Bold"/>
+                                    </HorizontalStackLayout>
+                                </Frame>
+                                <Frame Padding="10,6" BackgroundColor="#1b2638" CornerRadius="10" HasShadow="False">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="Mín" TextColor="#9CA3AF" FontSize="12"/>
+                                        <Label x:Name="lblMin" Text="-- °C" TextColor="White" FontAttributes="Bold"/>
+                                    </HorizontalStackLayout>
+                                </Frame>
+                            </HorizontalStackLayout>
                         </Grid>
                     </Frame>
 
+                    <!-- Métricas rápidas (ahora en 3 columnas reales) -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <Frame Grid.Column="0" BackgroundColor="#111827" CornerRadius="14" HasShadow="True" Padding="12">
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="Viento" TextColor="#9CA3AF" FontSize="12"/>
+                                <Label x:Name="lblViento" Text="-- km/h" TextColor="White" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <Frame Grid.Column="1" BackgroundColor="#111827" CornerRadius="14" HasShadow="True" Padding="12">
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="Humedad" TextColor="#9CA3AF" FontSize="12"/>
+                                <Label x:Name="lblHumedad" Text="-- %" TextColor="White" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <Frame Grid.Column="2" BackgroundColor="#111827" CornerRadius="14" HasShadow="True" Padding="12">
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="Lluvia" TextColor="#9CA3AF" FontSize="12"/>
+                                <Label x:Name="lblLluvia" Text="-- mm" TextColor="White" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </Grid>
+
                     <!-- Título pronóstico -->
                     <Label Text="Pronóstico próximos 5 días"
-                 Style="{StaticResource Headline}"
-                 HorizontalOptions="Center" />
+                           Style="{StaticResource Headline}"
+                           HorizontalOptions="Center" />
 
-                    <!-- Forecast horizontal (centrado por el mismo ancho máximo) -->
+                    <!-- Pronóstico (horizontal) -->
                     <CollectionView x:Name="climaCollection"
-                          HeightRequest="210"
-                          ItemsUpdatingScrollMode="KeepScrollOffset"
-                          HorizontalOptions="FillAndExpand">
+                                    HeightRequest="215"
+                                    ItemsUpdatingScrollMode="KeepScrollOffset"
+                                    HorizontalOptions="FillAndExpand">
                         <CollectionView.EmptyView>
                             <VerticalStackLayout Padding="24" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
                                 <Label Text="No hay datos de pronóstico disponibles."
-                       Style="{StaticResource DescriptionText}"
-                       TextColor="#9CA3AF"/>
+                                       Style="{StaticResource DescriptionText}"
+                                       TextColor="#9CA3AF"/>
                                 <Button Text="Reintentar" Clicked="Reintentar_Clicked"
-                        BackgroundColor="#334155" TextColor="White" CornerRadius="10" Padding="10,6"/>
+                                        BackgroundColor="#334155" TextColor="White" CornerRadius="10" Padding="10,6"/>
                             </VerticalStackLayout>
                         </CollectionView.EmptyView>
 
                         <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12"/>
                         </CollectionView.ItemsLayout>
 
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Frame BackgroundColor="{StaticResource AzulPrincipal}"
-                       CornerRadius="12"
-                       Padding="12"
-                       Margin="2"
-                       WidthRequest="140"
-                       HasShadow="True">
-                                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <Frame BackgroundColor="#1b2638"
+                                       CornerRadius="16"
+                                       Padding="12"
+                                       Margin="2"
+                                       WidthRequest="140"
+                                       HasShadow="True">
+                                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                                         <Label Text="{Binding Fecha}"
-                           Style="{StaticResource SubHeadline}"
-                           HorizontalTextAlignment="Center"
-                           TextColor="White"/>
-                                        <Image HeightRequest="56" WidthRequest="56">
+                                               Style="{StaticResource SubHeadline}"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="White"/>
+                                        <Image HeightRequest="50" WidthRequest="50">
                                             <Image.Source>
                                                 <UriImageSource Uri="{Binding Icono}"
-                                        CachingEnabled="True"
-                                        CacheValidity="06:00:00"/>
+                                                                CachingEnabled="True"
+                                                                CacheValidity="06:00:00"/>
                                             </Image.Source>
                                         </Image>
+
+                                        <!-- Temp principal -->
                                         <Label Text="{Binding Temperatura, StringFormat='{}{0:0} °C'}"
-                           Style="{StaticResource DescriptionText}"
-                           TextColor="White"/>
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="White"/>
+
+                                        <!-- Descripción -->
                                         <Label Text="{Binding Descripcion}"
-                           FontSize="12"
-                           HorizontalTextAlignment="Center"
-                           TextColor="White"/>
+                                               FontSize="12"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="#CFD8E3"/>
+
+                                        <!-- Máx / Mín si existen -->
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding TieneMaxMin}">
+                                            <Label Text="{Binding Tmin, StringFormat='min {0:0}°'}" Grid.Column="0" FontSize="11" TextColor="#9CA3AF"/>
+                                            <BoxView Grid.Column="1" HeightRequest="1" BackgroundColor="#2A3A52" VerticalOptions="Center"/>
+                                            <Label Text="{Binding Tmax, StringFormat='max {0:0}°'}" Grid.Column="2" FontSize="11" TextColor="#9CA3AF"/>
+                                        </Grid>
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
@@ -130,9 +202,7 @@
         </RefreshView>
 
         <!-- Overlay de carga -->
-        <Grid x:Name="busyOverlay"
-          BackgroundColor="#80000000"
-          IsVisible="False">
+        <Grid x:Name="busyOverlay" BackgroundColor="#80000000" IsVisible="False">
             <ActivityIndicator IsRunning="True" IsVisible="True" VerticalOptions="Center" HorizontalOptions="Center" />
         </Grid>
     </Grid>
