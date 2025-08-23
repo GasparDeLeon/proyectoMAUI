@@ -1,72 +1,163 @@
-﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.MainPage"
-             BackgroundColor="{StaticResource FondoOscuro}">
+             BackgroundColor="{StaticResource FondoOscuro}"
+             Padding="{OnPlatform iOS='0,18,0,0', Android='0', WinUI='0'}">
 
-    <Grid>
-        <BoxView>
-            <BoxView.Background>
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HERO superior con curva inferior AJUSTADA -->
+        <Border x:Name="heroBorder" HeightRequest="110">
+            <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#1A2332" Offset="0.0" />
-                    <GradientStop Color="#2C3E50" Offset="1.0" />
+                    <GradientStop Color="#0f172a" Offset="0.0" />
+                    <GradientStop Color="#1f2a44" Offset="1.0" />
                 </LinearGradientBrush>
-            </BoxView.Background>
-        </BoxView>
+            </Border.Background>
+            <Border.StrokeShape>
+                <!-- Curva inferior más suave -->
+                <RoundRectangle CornerRadius="0,0,12,12" />
+            </Border.StrokeShape>
 
-        <ScrollView>
-            <VerticalStackLayout Padding="25" Spacing="25"
-                                 VerticalOptions="Center"
-                                 HorizontalOptions="Center">
-
+            <VerticalStackLayout Spacing="4" Padding="24,20,24,8">
                 <Label Text="La Voz del Este"
-                       Style="{StaticResource Headline}" />
-
+                       Style="{StaticResource Headline}"
+                       HorizontalTextAlignment="Center"
+                       TextColor="White"/>
                 <Label x:Name="lblBienvenida"
                        Text="Bienvenido"
-                       FontSize="20"
-                       HorizontalOptions="Center"
-                       TextColor="White"/>  
+                       FontSize="16"
+                       TextColor="#DCE8FF"
+                       HorizontalTextAlignment="Center"/>
+                <Label Text="Música, noticias y compañía desde Punta del Este"
+                       FontSize="12"
+                       TextColor="#9fb3c8"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </Border>
 
+        <!-- CONTENIDO -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout x:Name="rootStack"
+                                 Spacing="18"
+                                 Padding="24,0,24,28"
+                                 HorizontalOptions="Center"
+                                 MaximumWidthRequest="460">
 
-                <Frame BackgroundColor="{StaticResource Blanco}"
-                       Padding="30"
-                       CornerRadius="25"
-                       HasShadow="True"
-                       WidthRequest="320">
+                <!-- TARJETA: REPRODUCTOR EN VIVO (bajada para que no la tape el hero) -->
+                <Frame x:Name="playerCard"
+                       Margin="0,12,0,0"
+                       Padding="22"
+                       BackgroundColor="{StaticResource Blanco}"
+                       CornerRadius="26"
+                       HasShadow="True">
+                    <Frame.Shadow>
+                        <Shadow Radius="12" Opacity="0.16">
+                            <Shadow.Brush>
+                                <SolidColorBrush Color="#000000"/>
+                            </Shadow.Brush>
+                        </Shadow>
+                    </Frame.Shadow>
 
-                    <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+                    <VerticalStackLayout Spacing="14">
 
-                        <Image Source="reproductor_radio.png"
-                               HeightRequest="120"
-                               Aspect="AspectFit" />
+                        <!-- Encabezado del card -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <Border WidthRequest="40" HeightRequest="40"
+                                    BackgroundColor="#eaf2ff"
+                                    HorizontalOptions="Start" VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Image Source="reproductor_radio.png" Margin="8" Aspect="AspectFit"/>
+                            </Border>
 
-                        <Label Text="Reproductor de radio en desarrollo..."
-                               Style="{StaticResource SubHeadline}"
-                               TextColor="{StaticResource AzulPrincipal}"
-                               HorizontalOptions="Center" />
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="Reproductor en vivo"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource AzulPrincipal}" />
+                                <Label Text="Señal preparándose…"
+                                       FontSize="12"
+                                       TextColor="#6b7a90" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
 
-                        <Button Text="▶ Reproducir"
-                                IsEnabled="False"
-                                Opacity="0.6"
-                                WidthRequest="200"
-                                HeightRequest="50"
-                                FontSize="18"
-                                CornerRadius="12"
+                        <!-- Botón principal (placeholder) -->
+                        <Button x:Name="btnReproducir"
+                                Text="▶ Reproducir"
+                                Clicked="OnPlayClicked"
+                                WidthRequest="246"
+                                HeightRequest="48"
+                                FontSize="17"
+                                CornerRadius="16"
                                 BackgroundColor="{StaticResource AzulSecundario}"
-                                TextColor="{StaticResource Blanco}" />
+                                TextColor="{StaticResource Blanco}"
+                                HorizontalOptions="Center" />
 
-                        <BoxView HeightRequest="6"
-                                 WidthRequest="220"
-                                 BackgroundColor="{StaticResource AzulSecundario}"
-                                 CornerRadius="3" />
+                        <!-- Volumen compacto -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label Text="🔊" FontSize="14" VerticalTextAlignment="Center"/>
+                            <Slider WidthRequest="160" IsEnabled="False" Minimum="0" Maximum="100" Value="50"/>
+                        </HorizontalStackLayout>
 
-                        <Label Text="🔊 Volumen"
-                               Style="{StaticResource DescriptionText}"
-                               HorizontalOptions="Center"
-                               TextColor="{StaticResource AzulSecundario}"/>
-
+                        <!-- Barra decorativa fina -->
+                        <Border Margin="0,8,0,0"
+                                HeightRequest="6"
+                                BackgroundColor="#eef3fb"
+                                HorizontalOptions="Fill">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="5" />
+                            </Border.StrokeShape>
+                            <Grid>
+                                <BoxView x:Name="progressPulse"
+                                         HeightRequest="6"
+                                         WidthRequest="120"
+                                         CornerRadius="3"
+                                         HorizontalOptions="Start"
+                                         BackgroundColor="{StaticResource AzulSecundario}"/>
+                            </Grid>
+                        </Border>
                     </VerticalStackLayout>
                 </Frame>
+
+                <!-- TARJETA: HOY EN LA EMISORA -->
+                <Frame x:Name="infoCard"
+                       Padding="18"
+                       BackgroundColor="#12385A"
+                       CornerRadius="18"
+                       HasShadow="False">
+                    <VerticalStackLayout Spacing="8">
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="📅" FontSize="16" />
+                            <Label Text="Hoy en la emisora"
+                                   TextColor="White"
+                                   FontAttributes="Bold"
+                                   FontSize="15"/>
+                        </HorizontalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="• 07:00 — Magazine Matutino" TextColor="#D7E6F9" FontSize="13"/>
+                            <Label Text="• 12:00 — Noticias Punta del Este" TextColor="#D7E6F9" FontSize="13"/>
+                            <Label Text="• 18:00 — Tardes de Clásicos" TextColor="#D7E6F9" FontSize="13"/>
+                            <Label Text="• 21:00 — Sesión Chill" TextColor="#D7E6F9" FontSize="13"/>
+                        </VerticalStackLayout>
+
+                        <Label Text="* Programación sujeta a cambios."
+                               TextColor="#9FB6D1" FontSize="11" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Footer con divisor tenue -->
+                <VerticalStackLayout Spacing="6" Padding="0,8,0,0">
+                    <BoxView HeightRequest="1" BackgroundColor="#233549" HorizontalOptions="Fill"/>
+                    <Label Text="© La Voz del Este"
+                           FontSize="11"
+                           Opacity="0.6"
+                           HorizontalTextAlignment="Center"
+                           TextColor="#c8d6e8"/>
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;          // Preferences
@@ -16,23 +16,15 @@ namespace ObligatorioTT
 
         public MainPage()
         {
-            try
-            {
-                InitializeComponent();
-                _db = ServiceHelper.GetService<DatabaseService>();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("ERROR en MainPage: " + ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                throw;
-            }
+            InitializeComponent();
+            _db = ServiceHelper.GetService<DatabaseService>();
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
             await ActualizarBienvenidaAsync();
+            _ = RunEntranceAnimationsAsync();
         }
 
         private async Task ActualizarBienvenidaAsync()
@@ -44,7 +36,6 @@ namespace ObligatorioTT
 
                 if (userId > 0)
                 {
-                    // Usamos el método que ya tenés: GetUsuariosAsync + FirstOrDefault
                     var lista = await _db.GetUsuariosAsync();
                     usuario = lista.FirstOrDefault(u => u.Id == userId);
                 }
@@ -53,21 +44,66 @@ namespace ObligatorioTT
                 {
                     var userName = Preferences.Get("LoggedUser", string.Empty);
                     if (!string.IsNullOrWhiteSpace(userName))
-                    {
-                        // Fallback por username si hiciera falta
                         usuario = await _db.GetUsuarioByUserAsync(userName);
-                    }
                 }
 
-                if (usuario != null && this.FindByName<Label>("lblBienvenida") is Label lbl)
-                {
-                    lbl.Text = $"Bienvenido, {usuario.NombreCompleto}";
-                }
+                if (usuario != null)
+                    lblBienvenida.Text = $"Bienvenido, {usuario.NombreCompleto}";
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[MainPage.ActualizarBienvenidaAsync] {ex}");
-                
+            }
+        }
+
+        // Click del botón (placeholder hasta conectar el stream)
+        private async void OnPlayClicked(object sender, EventArgs e)
+        {
+            await DisplayAlert("Reproductor", "La señal en vivo estará disponible pronto.", "OK");
+        }
+
+        // Animaciones sutiles y “pulso” de la barra decorativa
+        private async Task RunEntranceAnimationsAsync()
+        {
+            try
+            {
+                var hero = this.FindByName<Border>("heroBorder");
+                var card = this.FindByName<Frame>("playerCard");
+                var info = this.FindByName<Frame>("infoCard");
+                var bar = this.FindByName<View>("progressPulse");
+
+                if (hero != null) hero.Opacity = 0;
+                if (card != null)
+                {
+                    card.Opacity = 0;
+                    card.Scale = 0.98;
+                }
+                if (info != null) info.Opacity = 0;
+
+                if (hero != null) await hero.FadeTo(1, 220, Easing.CubicOut);
+                if (card != null)
+                {
+                    await Task.WhenAll(
+                        card.FadeTo(1, 300, Easing.CubicOut),
+                        card.ScaleTo(1, 300, Easing.CubicOut)
+                    );
+                }
+                if (info != null) await info.FadeTo(1, 240, Easing.CubicOut);
+
+                // Pulso decorativo
+                if (bar != null)
+                {
+                    if (bar.Width <= 0) await Task.Delay(60);
+                    while (IsVisible)
+                    {
+                        await bar.TranslateTo(90, 0, 900, Easing.CubicInOut);
+                        await bar.TranslateTo(0, 0, 900, Easing.CubicInOut);
+                    }
+                }
+            }
+            catch
+            {
+                // Solo visual
             }
         }
     }
