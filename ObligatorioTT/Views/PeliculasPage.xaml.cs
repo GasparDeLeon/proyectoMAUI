@@ -273,9 +273,11 @@ public partial class PeliculasPage : ContentPage
     {
         if (sender is Button btn && btn.CommandParameter is Pelicula p && !string.IsNullOrWhiteSpace(p.TrailerUrl))
         {
-            try { await Launcher.Default.OpenAsync(p.TrailerUrl); } catch { }
+            // Navega a la nueva página que creamos (TrailerPage)
+            await Navigation.PushAsync(new TrailerPage(p.TrailerUrl));
         }
     }
+
 
     // NUEVO: expandir/colapsar sinopsis en la misma card
     private void ToggleExpand_Clicked(object sender, EventArgs e)

@@ -16,20 +16,15 @@
                 </LinearGradientBrush>
             </BoxView.Background>
         </BoxView>
-
-        <RefreshView x:Name="refreshView" Refreshing="RefreshView_Refreshing">
             <ScrollView>
                 <VerticalStackLayout Padding="20" Spacing="16">
 
-                    <!-- Header con Frame -->
+                    <!-- Header -->
                     <Frame Padding="14" HasShadow="True" CornerRadius="16" BackgroundColor="#1f2937">
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Mercado de divisas"
                                        TextColor="White" FontSize="20" FontAttributes="Bold" />
-                                <Label x:Name="lblFecha"
-                                       Text="Última actualización: -"
-                                       TextColor="#9CA3AF" FontSize="12" />
                             </VerticalStackLayout>
 
                             <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
@@ -41,74 +36,92 @@
                         </Grid>
                     </Frame>
 
-                    <!-- Cards -->
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
-                        <!-- USD ocupa toda la fila 0 -->
-                        <Frame Grid.Row="0" Grid.ColumnSpan="2"
-           BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
-                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                    <!-- Cards (3 full-width, uniform, valor a la derecha) -->
+                    <VerticalStackLayout Spacing="12">
+
+                        <!-- USD -->
+                        <Frame BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto" ColumnSpacing="12">
                                 <Frame Padding="8" BackgroundColor="#0b1220" HasShadow="False" CornerRadius="12"
-                   WidthRequest="48" HeightRequest="48">
-                                    <Label Text="🇺🇸" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                       WidthRequest="48" HeightRequest="48" VerticalOptions="Center">
+                                    <Image Source="us.png"
+                                           WidthRequest="28" HeightRequest="28"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Frame>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                    <Label Text="Dólar estadounidense" TextColor="White" FontAttributes="Bold" />
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="Dólar US" TextColor="White" FontAttributes="Bold" />
                                     <Label Text="USD" TextColor="#9CA3AF" FontSize="12" />
                                 </VerticalStackLayout>
 
-                                <Label Grid.Row="1" Grid.ColumnSpan="2" x:Name="lblUSD"
-                   Text="-" TextColor="White" FontSize="22" FontAttributes="Bold" />
+                                <Label Grid.Column="2" x:Name="lblUSD"
+                                       Text="-" TextColor="White" FontSize="22" FontAttributes="Bold"
+                                       VerticalOptions="Center" HorizontalOptions="End" />
                             </Grid>
                         </Frame>
 
-                        <!-- EUR a la izquierda en la fila 1 -->
-                        <Frame Grid.Row="1" Grid.Column="0"
-           BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
-                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                        <!-- EUR -->
+                        <Frame BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto" ColumnSpacing="12">
                                 <Frame Padding="8" BackgroundColor="#0b1220" HasShadow="False" CornerRadius="12"
-                   WidthRequest="48" HeightRequest="48">
-                                    <Label Text="🇪🇺" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                       WidthRequest="48" HeightRequest="48" VerticalOptions="Center">
+                                    <Image Source="eu.png"
+                                           WidthRequest="28" HeightRequest="28"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Frame>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                     <Label Text="Euro" TextColor="White" FontAttributes="Bold" />
                                     <Label Text="EUR" TextColor="#9CA3AF" FontSize="12" />
                                 </VerticalStackLayout>
 
-                                <Label Grid.Row="1" Grid.ColumnSpan="2" x:Name="lblEUR"
-                   Text="-" TextColor="White" FontSize="20" FontAttributes="Bold" />
+                                <Label Grid.Column="2" x:Name="lblEUR"
+                                       Text="-" TextColor="White" FontSize="22" FontAttributes="Bold"
+                                       VerticalOptions="Center" HorizontalOptions="End" />
                             </Grid>
                         </Frame>
 
-                        <!-- BRL a la derecha en la fila 1 -->
-                        <Frame Grid.Row="1" Grid.Column="1"
-           BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
-                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                        <!-- BRL -->
+                        <Frame BackgroundColor="#111827" CornerRadius="18" HasShadow="True" Padding="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto" ColumnSpacing="12">
                                 <Frame Padding="8" BackgroundColor="#0b1220" HasShadow="False" CornerRadius="12"
-                   WidthRequest="48" HeightRequest="48">
-                                    <Label Text="🇧🇷" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                       WidthRequest="48" HeightRequest="48" VerticalOptions="Center">
+                                    <Image Source="br.png"
+                                           WidthRequest="28" HeightRequest="28"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Frame>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                    <Label Text="Real brasileño" TextColor="White" FontAttributes="Bold" />
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="Real" TextColor="White" FontAttributes="Bold" />
                                     <Label Text="BRL" TextColor="#9CA3AF" FontSize="12" />
                                 </VerticalStackLayout>
 
-                                <Label Grid.Row="1" Grid.ColumnSpan="2" x:Name="lblBRL"
-                   Text="-" TextColor="White" FontSize="20" FontAttributes="Bold" />
+                                <Label Grid.Column="2" x:Name="lblBRL"
+                                       Text="-" TextColor="White" FontSize="22" FontAttributes="Bold"
+                                       VerticalOptions="Center" HorizontalOptions="End" />
                             </Grid>
                         </Frame>
-                    </Grid>
 
+                    </VerticalStackLayout>
 
-                    <Button Text="Actualizar cotizaciones" Clicked="Actualizar_Clicked"
-                            BackgroundColor="#334155" TextColor="White"
-                            CornerRadius="12" Padding="12,10" />
+                    <!-- Actualización -->
+                    <Label x:Name="lblUpdatedBottom"
+                           Text="Actualizado: -"
+                           TextColor="#9CA3AF"
+                           FontSize="12"
+                           FontAttributes="Italic"
+                           Opacity="0.9"
+                           Margin="2,2,0,0"
+                           HorizontalOptions="Start" />
 
-                    <!-- Estado vacío / error -->
+                    <!-- Estado / errores -->
                     <Label x:Name="lblEstado" Text=""
                            TextColor="#9CA3AF" FontSize="12"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </ScrollView>
-        </RefreshView>
     </Grid>
 </ContentPage>

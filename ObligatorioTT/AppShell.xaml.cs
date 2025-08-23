@@ -19,8 +19,7 @@ namespace ObligatorioTT
             Routing.RegisterRoute(nameof(SponsorFormPage), typeof(SponsorFormPage));
             Routing.RegisterRoute(nameof(PreferenciasFlyoutPage), typeof(PreferenciasFlyoutPage));
             Routing.RegisterRoute(nameof(SponsorsPage), typeof(SponsorsPage));
-
-
+            Routing.RegisterRoute(nameof(TrailerPage), typeof(TrailerPage));
 
 #if ANDROID
             // Ruta SOLO Android: selector de pin en mapa
