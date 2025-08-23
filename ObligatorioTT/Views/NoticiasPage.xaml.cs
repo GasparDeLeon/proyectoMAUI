@@ -6,6 +6,7 @@ using System.Threading;
 using System.IO;
 using System.Linq;                       // <-- LINQ
 using System.Threading.Tasks;            // <-- Task
+using System.Windows.Input;              // <-- ICommand
 using Microsoft.Maui.ApplicationModel;   // <-- MainThread, Launcher
 using Microsoft.Maui.Controls;           // <-- ContentPage, ProgressBar, Label, SearchBar
 using Microsoft.Maui.Storage;
@@ -56,6 +57,28 @@ public partial class NoticiasPage : ContentPage
         CargarDesdeCacheSiHay();
         _ = LoadAsync(refresh: true);
     }
+
+    // ---- Command para tap en cada card (usado por el XAML) ----
+    public ICommand ItemTappedCommand => new Command<NoticiaItem>(async (item) =>
+    {
+        try
+        {
+            if (item == null) return;
+            if (!TryNormalizeUrl(item.Enlace, out var uri) || uri == null) return;
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                if (await Launcher.Default.CanOpenAsync(uri))
+                    await Launcher.Default.OpenAsync(uri);
+                else
+                    await Launcher.Default.OpenAsync(uri.ToString());
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("No se pudo abrir el enlace", ex.Message, "OK");
+        }
+    });
 
     // Helper: buscar control por nombre y castear seguro
     private T? Q<T>(string name) where T : class => this.FindByName(name) as T;
@@ -132,13 +155,30 @@ public partial class NoticiasPage : ContentPage
         await LoadAsync(refresh: false);
     }
 
+    // (Podés dejar este handler aunque el XAML ya no lo use)
     private async void NoticiasView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection?.FirstOrDefault() is NoticiaItem item && !string.IsNullOrWhiteSpace(item.Enlace))
+        try
         {
-            try { await Launcher.Default.OpenAsync(item.Enlace); } catch { }
+            if (sender is CollectionView cv) cv.SelectedItem = null;
+
+            var item = e.CurrentSelection?.FirstOrDefault() as NoticiaItem;
+            if (item == null) return;
+
+            if (!TryNormalizeUrl(item.Enlace, out var uri) || uri == null) return;
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                if (await Launcher.Default.CanOpenAsync(uri))
+                    await Launcher.Default.OpenAsync(uri);
+                else
+                    await Launcher.Default.OpenAsync(uri.ToString());
+            });
         }
-        ((CollectionView)sender).SelectedItem = null;
+        catch (Exception ex)
+        {
+            await DisplayAlert("No se pudo abrir el enlace", ex.Message, "OK");
+        }
     }
 
     // ---------------- Carga principal ----------------
@@ -175,7 +215,6 @@ public partial class NoticiasPage : ContentPage
                 return;
             }
 
-            // Dedupe por enlace
             var existentes = new HashSet<string>(Items.Select(i => i.Enlace ?? ""), StringComparer.OrdinalIgnoreCase);
 
             var nuevos = results.Select(n => new NoticiaItem
@@ -192,7 +231,6 @@ public partial class NoticiasPage : ContentPage
 
             foreach (var it in nuevos) Items.Add(it);
 
-            // Cachear solo en refresh (primera tanda)
             if (refresh)
             {
                 GuardarCacheEnArchivo(jsonStr);
@@ -203,7 +241,6 @@ public partial class NoticiasPage : ContentPage
                     lbl.Text = $"Actualizado: {DateTime.Now.ToString("dd/MM/yyyy HH:mm", uy)}";
             }
 
-            // Token de siguiente página
             var next = json["nextPage"]?.ToString();
             _nextPageToken = string.IsNullOrWhiteSpace(next) ? null : next;
         }
@@ -281,4 +318,23 @@ public partial class NoticiasPage : ContentPage
         if (string.IsNullOrWhiteSpace(s)) return fallback;
         try { return WebUtility.HtmlDecode(s); } catch { return s; }
     }
+
+    private static bool TryNormalizeUrl(string? raw, out Uri? uri)
+    {
+        uri = null;
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+
+        var s = raw.Trim();
+
+        if (!s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+            !s.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            s = "https://" + s;
+        }
+
+        s = WebUtility.HtmlDecode(s);
+
+        return Uri.TryCreate(s, UriKind.Absolute, out uri);
+    }
+
 }

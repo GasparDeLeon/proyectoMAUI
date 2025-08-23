@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ObligatorioTT.Views.NoticiasPage"
+             x:Name="Root"
              Title="Noticias"
              BackgroundColor="#0b1220">
 
@@ -52,10 +53,9 @@
                                 Grid.Row="2"
                                 Margin="16,0,16,16"
                                 ItemsSource="{Binding Items}"
-                                SelectionMode="Single"
+                                SelectionMode="None"
                                 RemainingItemsThreshold="4"
-                                RemainingItemsThresholdReached="NoticiasView_RemainingItemsThresholdReached"
-                                SelectionChanged="NoticiasView_SelectionChanged">
+                                RemainingItemsThresholdReached="NoticiasView_RemainingItemsThresholdReached">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout Padding="24" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
                             <Label Text="{Binding EmptyMessage}" TextColor="#9CA3AF" />
@@ -70,6 +70,12 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame CornerRadius="16" HasShadow="True" Padding="0" BackgroundColor="#111827">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference Root}, Path=ItemTappedCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+
                                 <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" Padding="12">
                                     <!-- Imagen (con caché) -->
                                     <Border Grid.RowSpan="3" StrokeThickness="0" StrokeShape="RoundRectangle 12" BackgroundColor="#0b1220" WidthRequest="120" HeightRequest="90">
