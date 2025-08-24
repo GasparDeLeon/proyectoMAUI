@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.Controls;
 
 namespace ObligatorioTT.Views;
 
@@ -12,15 +13,21 @@ public partial class CotizacionesPage : ContentPage
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(15) };
     private readonly CultureInfo _uy = new("es-UY");
 
-    // Cache + sello de tiempo
-    private const string LAST_UPDATE_KEY = "Cotizaciones_LastUpdate"; // guarda epoch seconds (UTC)
-    private static readonly string CacheFilePath = Path.Combine(FileSystem.AppDataDirectory, "cotizaciones_cache.json");
+    private const string LAST_UPDATE_KEY = "Cotizaciones_LastUpdate"; // epoch seconds (UTC)
+    private static readonly string CacheFilePath =
+        Path.Combine(FileSystem.AppDataDirectory, "cotizaciones_cache.json");
 
     public CotizacionesPage()
     {
         InitializeComponent();
-        // Carga inicial
+        // Carga inicial: nunca fuerza. Si ya se actualizó hoy, solo muestra caché.
         _ = CargarCotizacionesAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _cts?.Cancel();
     }
 
     private static bool DebeActualizar()
@@ -33,7 +40,11 @@ public partial class CotizacionesPage : ContentPage
         return lastLocalDate != hoyLocalDate;
     }
 
-    private async Task CargarCotizacionesAsync(bool force = false)
+    /// <summary>
+    /// Muestra caché y SOLO llama a la API si corresponde por día.
+    /// No hay manera de forzar desde UI.
+    /// </summary>
+    private async Task CargarCotizacionesAsync()
     {
         if (_cts != null) return;
         _cts = new CancellationTokenSource();
@@ -43,42 +54,40 @@ public partial class CotizacionesPage : ContentPage
             lblEstado.Text = "Cargando…";
             spinner.IsVisible = spinner.IsRunning = true;
 
-            // ¿Podemos usar cache?
-            if (!force && !DebeActualizar() && File.Exists(CacheFilePath))
+            // 1) Si hay caché, muéstrala de inmediato (mejor UX)
+            if (File.Exists(CacheFilePath))
             {
                 var jsonCache = await File.ReadAllTextAsync(CacheFilePath);
                 AplicarDatosAUI(jsonCache);
 
                 var lastEpoch = Preferences.Get(LAST_UPDATE_KEY, 0L);
-                if (lastEpoch > 0)
-                {
-                    var lastLocal = DateTimeOffset.FromUnixTimeSeconds(lastEpoch).ToLocalTime().DateTime;
-                    ActualizarLabelsFecha(lastLocal);
-                }
-                else
-                {
-                    ActualizarLabelsFecha(null);
-                }
-
-                lblEstado.Text = "";
-                return;
+                DateTime? lastLocal = lastEpoch > 0
+                    ? DateTimeOffset.FromUnixTimeSeconds(lastEpoch).ToLocalTime().DateTime
+                    : (DateTime?)null;
+                ActualizarLabelsFecha(lastLocal);
             }
 
-            // Llamada a CurrencyLayer (ajustá tu key/endpoint si corresponde)
+            // 2) ¿Toca actualizar hoy?
+            if (!DebeActualizar())
+            {
+                lblEstado.Text = "";
+                return; // ya actualizada hoy ? NO llamamos a la API
+            }
+
+            // 3) Llamada a la API (solo si tocaba)
             const string accessKey = "507ee1905a93063864b39e802e1dee7d";
             string url = $"https://api.currencylayer.com/live?access_key={accessKey}&currencies=UYU,EUR,BRL&format=1";
 
-            var response = await _http.GetStringAsync(url, _cts.Token);
+            using var resp = await _http.GetAsync(url, _cts.Token);
+            resp.EnsureSuccessStatusCode();
+            var response = await resp.Content.ReadAsStringAsync();
 
-            // Guardar cache "tal cual"
+            // Cachear tal cual
             Directory.CreateDirectory(Path.GetDirectoryName(CacheFilePath)!);
             await File.WriteAllTextAsync(CacheFilePath, response, Encoding.UTF8);
+            Preferences.Set(LAST_UPDATE_KEY, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-            // Guardar sello de tiempo (UTC epoch seconds)
-            var nowUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            Preferences.Set(LAST_UPDATE_KEY, nowUtc);
-
-            // Aplicar a UI
+            // Aplicar nuevos datos
             AplicarDatosAUI(response);
             ActualizarLabelsFecha(DateTimeOffset.UtcNow.ToLocalTime().DateTime);
 
@@ -88,49 +97,18 @@ public partial class CotizacionesPage : ContentPage
         {
             lblEstado.Text = "La consulta fue cancelada.";
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
-            // Fallback a cache si existe
-            if (File.Exists(CacheFilePath))
-            {
-                var jsonCache = await File.ReadAllTextAsync(CacheFilePath);
-                AplicarDatosAUI(jsonCache);
-
-                var lastEpoch = Preferences.Get(LAST_UPDATE_KEY, 0L);
-                var lastLocal = lastEpoch > 0
-                    ? DateTimeOffset.FromUnixTimeSeconds(lastEpoch).ToLocalTime().DateTime
-                    : (DateTime?)null;
-                ActualizarLabelsFecha(lastLocal);
-
-                lblEstado.Text = "Mostrando datos en caché (sin conexión).";
-            }
-            else
-            {
-                lblEstado.Text = "Error de red al cargar cotizaciones.";
-                await DisplayAlert("Red", ex.Message, "OK");
-            }
+            // Sin red: mostrar caché si existe (ya se mostró en el paso 1)
+            lblEstado.Text = File.Exists(CacheFilePath)
+                ? "Mostrando datos en caché."
+                : "Error de red al cargar cotizaciones.";
         }
-        catch (Exception ex)
+        catch
         {
-            // Fallback a cache si existe
-            if (File.Exists(CacheFilePath))
-            {
-                var jsonCache = await File.ReadAllTextAsync(CacheFilePath);
-                AplicarDatosAUI(jsonCache);
-
-                var lastEpoch = Preferences.Get(LAST_UPDATE_KEY, 0L);
-                var lastLocal = lastEpoch > 0
-                    ? DateTimeOffset.FromUnixTimeSeconds(lastEpoch).ToLocalTime().DateTime
-                    : (DateTime?)null;
-                ActualizarLabelsFecha(lastLocal);
-
-                lblEstado.Text = "Mostrando datos en caché (error de servicio).";
-            }
-            else
-            {
-                lblEstado.Text = "Error al cargar cotizaciones.";
-                await DisplayAlert("Excepción", ex.Message, "OK");
-            }
+            lblEstado.Text = File.Exists(CacheFilePath)
+                ? "Mostrando datos en caché."
+                : "Error al cargar cotizaciones.";
         }
         finally
         {
@@ -143,25 +121,25 @@ public partial class CotizacionesPage : ContentPage
     private void AplicarDatosAUI(string json)
     {
         var data = JObject.Parse(json);
-
         if (data["success"]?.Value<bool>() != true)
-        {
-            var error = data["error"]?["info"]?.ToString() ?? "Respuesta inválida.";
-            throw new InvalidOperationException(error);
-        }
+            throw new InvalidOperationException(data["error"]?["info"]?.ToString() ?? "Respuesta inválida.");
 
         var quotes = data["quotes"]!;
-        decimal usdToUyu = quotes["USDUYU"]!.Value<decimal>();
-        decimal usdToEur = quotes["USDEUR"]!.Value<decimal>();
-        decimal usdToBrl = quotes["USDBRL"]!.Value<decimal>();
+        decimal usd = quotes["USDUYU"]!.Value<decimal>();
+        decimal eur = quotes["USDEUR"]!.Value<decimal>();
+        decimal brl = quotes["USDBRL"]!.Value<decimal>();
 
-        // Convertimos EUR/BRL a UYU a partir de USD:
-        decimal eurToUyu = usdToUyu / usdToEur;
-        decimal brlToUyu = usdToUyu / usdToBrl;
+        decimal eurToUyu = usd / eur;
+        decimal brlToUyu = usd / brl;
 
-        lblUSD.Text = $"{usdToUyu.ToString("N2", _uy)} UYU";
+        lblUSD.Text = $"{usd.ToString("N2", _uy)} UYU";
         lblEUR.Text = $"{eurToUyu.ToString("N2", _uy)} UYU";
         lblBRL.Text = $"{brlToUyu.ToString("N2", _uy)} UYU";
+
+        // Guardar para el widget de Inicio + broadcast
+        Preferences.Set("UltimoUSD", (double)usd);
+        Preferences.Set("UltimoUSD_TS", DateTime.UtcNow.ToString("o"));
+        MessagingCenter.Send<object, double>(this, "USD_UPDATED", (double)usd);
     }
 
     private void ActualizarLabelsFecha(DateTime? fechaLocal)
@@ -169,8 +147,15 @@ public partial class CotizacionesPage : ContentPage
         var texto = fechaLocal.HasValue
             ? fechaLocal.Value.ToString("dd/MM/yyyy HH:mm", _uy)
             : "-";
+        lblUpdatedBottom.Text = $"Actualizado: {texto}";
+    }
 
-        if (lblUpdatedBottom != null)
-            lblUpdatedBottom.Text = $"Actualizado: {texto}";
+    // Si tenés un botón "Actualizar" apuntado a este handler,
+    // ya NO fuerza: simplemente vuelve a llamar al flujo normal (respetando DebeActualizar).
+    private async void OnActualizarClicked(object sender, EventArgs e)
+    {
+        await CargarCotizacionesAsync();
+        // opcional: si NO corresponde actualizar hoy, podrías avisar:
+        // if (!DebeActualizar()) await DisplayAlert("Cotizaciones", "Ya se actualizó hoy.", "OK");
     }
 }

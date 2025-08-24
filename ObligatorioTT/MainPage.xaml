@@ -1,73 +1,274 @@
-﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ObligatorioTT.MainPage"
-             BackgroundColor="{StaticResource FondoOscuro}">
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ObligatorioTT.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="True"
+    x:Name="Root"
+    BackgroundColor="#0E1624"
+    Padding="{OnPlatform WinUI='0,32,0,0', Android='0', iOS='0'}">
 
-    <Grid>
-        <BoxView>
-            <BoxView.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#1A2332" Offset="0.0" />
-                    <GradientStop Color="#2C3E50" Offset="1.0" />
-                </LinearGradientBrush>
-            </BoxView.Background>
-        </BoxView>
+    <ContentPage.Resources>
+        <Color x:Key="CardBg">#121A2A</Color>
+        <Color x:Key="CardStroke">#22324C</Color>
+        <Color x:Key="Text">#E9F0FF</Color>
+        <Color x:Key="TextSubtle">#AFC3E6</Color>
+        <Color x:Key="Accent">#2EA3FF</Color>
 
-        <ScrollView>
-            <VerticalStackLayout Padding="25" Spacing="25"
-                                 VerticalOptions="Center"
-                                 HorizontalOptions="Center">
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+        </Style>
+        <Style x:Key="H1" TargetType="Label">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontAttributes" Value="Bold" />
+        </Style>
+        <Style x:Key="H2" TargetType="Label">
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+        <Style x:Key="Muted" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextColor" Value="{StaticResource TextSubtle}" />
+        </Style>
 
-                <Label Text="La Voz del Este"
-                       Style="{StaticResource Headline}" />
+        <!-- ✅ Sin type-converter: StrokeShape como objeto -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{StaticResource CardBg}" />
+            <Setter Property="Stroke" Value="{StaticResource CardStroke}" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="StrokeShape">
+                <Setter.Value>
+                    <RoundRectangle CornerRadius="18"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                <Label x:Name="lblBienvenida"
-                       Text="Bienvenido"
-                       FontSize="20"
-                       HorizontalOptions="Center"
-                       TextColor="White"/>  
+        <Style x:Key="IconLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="TextColor" Value="{StaticResource Accent}" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+    </ContentPage.Resources>
 
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#122034" Offset="0" />
+                <GradientStop Color="#0E1624" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
 
-                <Frame BackgroundColor="{StaticResource Blanco}"
-                       Padding="30"
-                       CornerRadius="25"
-                       HasShadow="True"
-                       WidthRequest="320">
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,8,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                    <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
-
-                        <Image Source="reproductor_radio.png"
-                               HeightRequest="120"
-                               Aspect="AspectFit" />
-
-                        <Label Text="Reproductor de radio en desarrollo..."
-                               Style="{StaticResource SubHeadline}"
-                               TextColor="{StaticResource AzulPrincipal}"
-                               HorizontalOptions="Center" />
-
-                        <Button Text="▶ Reproducir"
-                                IsEnabled="False"
-                                Opacity="0.6"
-                                WidthRequest="200"
-                                HeightRequest="50"
-                                FontSize="18"
-                                CornerRadius="12"
-                                BackgroundColor="{StaticResource AzulSecundario}"
-                                TextColor="{StaticResource Blanco}" />
-
-                        <BoxView HeightRequest="6"
-                                 WidthRequest="220"
-                                 BackgroundColor="{StaticResource AzulSecundario}"
-                                 CornerRadius="3" />
-
-                        <Label Text="🔊 Volumen"
-                               Style="{StaticResource DescriptionText}"
-                               HorizontalOptions="Center"
-                               TextColor="{StaticResource AzulSecundario}"/>
-
-                    </VerticalStackLayout>
-                </Frame>
+            <VerticalStackLayout Spacing="2">
+                <Label x:Name="lblSaludo" Style="{StaticResource H1}" Text="¡Hola!"/>
+                <Label x:Name="lblFecha"  Style="{StaticResource Muted}" Text="fecha"/>
             </VerticalStackLayout>
-        </ScrollView>
+
+            <Border Grid.Column="1" BackgroundColor="#19263A" Stroke="{StaticResource CardStroke}"
+                    Padding="6" Margin="12,0,0,0">
+                <!-- ✅ Sin converter -->
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14"/>
+                </Border.StrokeShape>
+                <Grid>
+                    <Image x:Name="imgAvatar" WidthRequest="36" HeightRequest="36" Aspect="AspectFill"
+                           Source="avatar_placeholder.png">
+                        <!-- ✅ Sin converter -->
+                        <Image.Clip>
+                            <EllipseGeometry Center="18,18" RadiusX="18" RadiusY="18"/>
+                        </Image.Clip>
+                    </Image>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer x:Name="tapPerfil"/>
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Contenido (SIN buscador) -->
+        <RefreshView Grid.Row="1" x:Name="refreshView">
+            <ScrollView>
+                <VerticalStackLayout Spacing="16" Padding="20,0,20,16">
+
+                    <!-- Acciones rápidas -->
+                    <Grid x:Name="gridAcciones"
+                          ColumnDefinitions="*,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto"
+                          ColumnSpacing="14" RowSpacing="14">
+
+                        <!-- Noticias -->
+                        <Border x:Name="cardNoticias" Style="{StaticResource Card}" Grid.Row="0" Grid.Column="0">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Text="📰" Style="{StaticResource IconLabel}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Noticias" Style="{StaticResource H2}"/>
+                                    <Label Text="Últimas del día" Style="{StaticResource Muted}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="20" TextColor="{StaticResource Accent}"/>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="tapNoticias"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </Border>
+
+                        <!-- Clima -->
+                        <Border x:Name="cardClima" Style="{StaticResource Card}" Grid.Row="0" Grid.Column="1">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Image x:Name="imgClima"
+                                       Source="sunny.png"
+                                       WidthRequest="26"
+                                       HeightRequest="26"
+                                       Aspect="AspectFit"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Clima" Style="{StaticResource H2}"/>
+                                    <Label x:Name="lblClimaResumen" Text="Maldonado • 18°" Style="{StaticResource Muted}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="20" TextColor="{StaticResource Accent}"/>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="tapClima"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </Border>
+
+                        <!-- Estrenos -->
+                        <Border x:Name="cardEstrenos" Style="{StaticResource Card}" Grid.Row="1" Grid.Column="0">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Text="🎬" Style="{StaticResource IconLabel}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Estrenos" Style="{StaticResource H2}"/>
+                                    <Label Text="Trailers y sinopsis" Style="{StaticResource Muted}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="20" TextColor="{StaticResource Accent}"/>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="tapPeliculas"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </Border>
+
+                        <!-- Patrocinadores -->
+                        <Border x:Name="cardPatro" Style="{StaticResource Card}" Grid.Row="1" Grid.Column="1">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Text="📍" Style="{StaticResource IconLabel}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Patrocinadores" Style="{StaticResource H2}"/>
+                                    <Label Text="Mapa y direcciones" Style="{StaticResource Muted}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="20" TextColor="{StaticResource Accent}"/>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="tapPatrocinadores"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Widget USD/UYU -->
+                    <Grid x:Name="gridWidgets" ColumnDefinitions="*,*" RowDefinitions="Auto" ColumnSpacing="14">
+                        <Border x:Name="widgetUsd" Style="{StaticResource Card}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label Text="💱" Style="{StaticResource IconLabel}"/>
+                                <Label Grid.Column="1" Text="USD/UYU" Style="{StaticResource Muted}"/>
+                                <Label Grid.Column="2" Text="›" FontSize="18" TextColor="{StaticResource Accent}"/>
+                                <Label Grid.Row="1" Grid.ColumnSpan="3" x:Name="lblUsdUy" Text="$ --,--" Style="{StaticResource H2}"/>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer x:Name="tapCotizaciones"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <!-- Mini player -->
+        <Border Grid.Row="2" BackgroundColor="#0F1A2B" Stroke="{StaticResource CardStroke}"
+                Padding="12" Margin="14,6">
+            <!-- ✅ Sin converter -->
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="14"/>
+            </Border.StrokeShape>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                <Frame WidthRequest="40" HeightRequest="40" CornerRadius="8" BackgroundColor="#1C2A42" HasShadow="False" Padding="0">
+                    <Image x:Name="imgCover" Source="radio_cover.png" Aspect="AspectFill"/>
+                </Frame>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="0">
+                    <Label x:Name="lblNowTitle" Text="Ahora suena" Style="{StaticResource Muted}"/>
+                    <Label x:Name="lblNowTrack" Text="Programa / Locutor" Style="{StaticResource H2}" FontSize="16"/>
+                </VerticalStackLayout>
+
+                <Grid Grid.Column="2" RowSpan="2" VerticalOptions="Center">
+                    <ImageButton x:Name="btnPlayPause" WidthRequest="44" HeightRequest="44"
+                                 BackgroundColor="{StaticResource Accent}" CornerRadius="22"
+                                 Padding="0" Source="ic_play.png"/>
+                </Grid>
+
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,8,0">
+                    <ProgressBar x:Name="pbProgreso" Progress="0" HeightRequest="3"
+                                 BackgroundColor="#1F2C44" ProgressColor="{StaticResource Accent}"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Estados responsivos -->
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WidthStates">
+                <VisualState x:Name="Narrow">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter TargetName="cardNoticias" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="cardNoticias" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="cardNoticias" Property="Grid.Row" Value="0"/>
+
+                        <Setter TargetName="cardClima" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="cardClima" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="cardClima" Property="Grid.Row" Value="1"/>
+
+                        <Setter TargetName="cardEstrenos" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="cardEstrenos" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="cardEstrenos" Property="Grid.Row" Value="2"/>
+
+                        <Setter TargetName="cardPatro" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="cardPatro" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="cardPatro" Property="Grid.Row" Value="3"/>
+
+                        <Setter TargetName="widgetUsd" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="widgetUsd" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="widgetUsd" Property="Grid.Row" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Wide">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="900"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter TargetName="cardNoticias" Property="Grid.Row" Value="0"/>
+                        <Setter TargetName="cardNoticias" Property="Grid.Column" Value="0"/>
+
+                        <Setter TargetName="cardClima" Property="Grid.Row" Value="0"/>
+                        <Setter TargetName="cardClima" Property="Grid.Column" Value="1"/>
+
+                        <Setter TargetName="cardEstrenos" Property="Grid.Row" Value="1"/>
+                        <Setter TargetName="cardEstrenos" Property="Grid.Column" Value="0"/>
+
+                        <Setter TargetName="cardPatro" Property="Grid.Row" Value="1"/>
+                        <Setter TargetName="cardPatro" Property="Grid.Column" Value="1"/>
+
+                        <Setter TargetName="widgetUsd" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="widgetUsd" Property="Grid.ColumnSpan" Value="2"/>
+                        <Setter TargetName="widgetUsd" Property="Grid.Row" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </ContentPage>

@@ -12,176 +12,97 @@
     TitleColor="{DynamicResource ShellTitleColor}"
     FlyoutBackgroundColor="{DynamicResource ShellBackgroundColor}">
 
-    <FlyoutItem x:Name="RootItem" FlyoutDisplayOptions="AsMultipleItems" Route="Root" Shell.TabBarIsVisible="False">
+    <!-- ================== Items del Flyout ================== -->
+    <FlyoutItem x:Name="RootItem"
+                FlyoutDisplayOptions="AsMultipleItems"
+                Route="Root"
+                Shell.TabBarIsVisible="False">
 
         <ShellContent x:Name="InicioItem"
                       Title="Inicio"
                       Route="MainPage"
-                      ContentTemplate="{DataTemplate local:MainPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE88A;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- home -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate local:MainPage}" />
 
         <ShellContent x:Name="PerfilItem"
                       Title="Mi perfil"
                       Route="PerfilPage"
-                      ContentTemplate="{DataTemplate views:PerfilPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE853;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- person -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:PerfilPage}" />
 
         <ShellContent x:Name="ClimaItem"
                       Title="Clima"
                       Route="ClimaPage"
-                      ContentTemplate="{DataTemplate views:ClimaPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE430;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- wb_sunny -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:ClimaPage}" />
 
         <ShellContent x:Name="CotizacionesItem"
                       Title="Cotizaciones"
                       Route="CotizacionesPage"
-                      ContentTemplate="{DataTemplate views:CotizacionesPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE227;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- attach_money -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:CotizacionesPage}" />
 
         <ShellContent x:Name="NoticiasItem"
                       Title="Noticias"
                       Route="NoticiasPage"
-                      ContentTemplate="{DataTemplate views:NoticiasPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xEF42;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- article -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:NoticiasPage}" />
 
         <ShellContent x:Name="PeliculasItem"
                       Title="Películas"
                       Route="PeliculasPage"
-                      ContentTemplate="{DataTemplate views:PeliculasPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE02C;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- movie -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:PeliculasPage}" />
 
         <ShellContent x:Name="PatrocinadoresItem"
                       Title="Patrocinadores"
                       Route="PatrocinadoresPage"
-                      ContentTemplate="{DataTemplate views:PatrocinadoresPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE8D1;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- store -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:PatrocinadoresPage}" />
 
         <ShellContent x:Name="MapaItem"
                       Title="Mapa"
                       Route="MapaPage"
-                      ContentTemplate="{DataTemplate views:MapaPage}">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE55F;" Size="24" Color="{DynamicResource ShellForegroundColor}" />
-                <!-- place -->
-            </ShellContent.Icon>
-        </ShellContent>
+                      ContentTemplate="{DataTemplate views:MapaPage}" />
 
     </FlyoutItem>
 
+    <!-- ================== Footer del Flyout ================== -->
     <Shell.FlyoutFooter>
         <Grid Padding="0,0,0,14" BackgroundColor="{DynamicResource ShellBackgroundColor}">
             <VerticalStackLayout Spacing="0" Padding="0">
 
                 <!-- Preferencias -->
                 <Grid x:Name="PrefRow"
-                  Padding="16,14"
-                  BackgroundColor="Transparent"
-                  HorizontalOptions="FillAndExpand">
+                      Padding="16,14"
+                      BackgroundColor="Transparent"
+                      HorizontalOptions="FillAndExpand">
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <!-- Icono: settings -->
-                        <Label FontFamily="MaterialIcons"
-                           Text="&#xE8B8;"
-                           FontSize="20"
-                           TextColor="{DynamicResource ShellForegroundColor}"
-                           VerticalOptions="Center" />
-                        <!-- Texto -->
+                        <!-- Solo texto -->
                         <Label Text="Preferencias"
-                           FontSize="16"
-                           TextColor="{DynamicResource ShellForegroundColor}"
-                           VerticalOptions="Center" />
+                               FontSize="16"
+                               TextColor="{DynamicResource ShellForegroundColor}"
+                               VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnPreferenciasFooterTapped" />
                     </Grid.GestureRecognizers>
-
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroup>
-                            <VisualState Name="Normal" />
-                            <VisualState Name="PointerOver">
-                                <VisualState.Setters>
-                                    <Setter TargetName="PrefRow" Property="BackgroundColor" Value="#111111" />
-                                </VisualState.Setters>
-                            </VisualState>
-                            <VisualState Name="Pressed">
-                                <VisualState.Setters>
-                                    <Setter TargetName="PrefRow" Property="BackgroundColor" Value="#1A1A1A" />
-                                </VisualState.Setters>
-                            </VisualState>
-                        </VisualStateGroup>
-                    </VisualStateManager.VisualStateGroups>
                 </Grid>
 
                 <BoxView HeightRequest="1"
-                     BackgroundColor="{DynamicResource ShellSeparatorColor}"
-                     Opacity="0.08" />
+                         BackgroundColor="{DynamicResource ShellSeparatorColor}"
+                         Opacity="0.08" />
 
                 <!-- Cerrar sesión -->
                 <Grid x:Name="LogoutRow"
-                  Padding="16,14"
-                  BackgroundColor="Transparent"
-                  HorizontalOptions="FillAndExpand">
+                      Padding="16,14"
+                      BackgroundColor="Transparent"
+                      HorizontalOptions="FillAndExpand">
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <!-- Icono: exit_to_app (alternativa: power_settings_new = &#xE9BA;) -->
-                        <Label FontFamily="MaterialIcons"
-                           Text="&#xE879;"
-                           FontSize="20"
-                           TextColor="{DynamicResource ShellForegroundColor}"
-                           VerticalOptions="Center" />
-                        <!-- Texto -->
+                        <!-- Solo texto -->
                         <Label Text="Cerrar sesión"
-                           FontSize="16"
-                           TextColor="{DynamicResource ShellForegroundColor}"
-                           VerticalOptions="Center" />
+                               FontSize="16"
+                               TextColor="{DynamicResource ShellForegroundColor}"
+                               VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCerrarSesionFooterTapped" />
                     </Grid.GestureRecognizers>
-
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroup>
-                            <VisualState Name="Normal" />
-                            <VisualState Name="PointerOver">
-                                <VisualState.Setters>
-                                    <Setter TargetName="LogoutRow" Property="BackgroundColor" Value="#111111" />
-                                </VisualState.Setters>
-                            </VisualState>
-                            <VisualState Name="Pressed">
-                                <VisualState.Setters>
-                                    <Setter TargetName="LogoutRow" Property="BackgroundColor" Value="#1A1A1A" />
-                                </VisualState.Setters>
-                            </VisualState>
-                        </VisualStateGroup>
-                    </VisualStateManager.VisualStateGroups>
                 </Grid>
 
             </VerticalStackLayout>
