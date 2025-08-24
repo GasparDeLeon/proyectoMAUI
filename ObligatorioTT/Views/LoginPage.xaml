@@ -5,6 +5,34 @@
              Title="Iniciar sesión"
              BackgroundColor="#0b1220">
 
+    <!-- ====== Recursos / Estilos para unificar botones ====== -->
+    <ContentPage.Resources>
+        <!-- Estilo base para todos los botones -->
+        <Style x:Key="BaseBtn" TargetType="Button">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="HorizontalOptions" Value="Fill"/>
+            <Setter Property="HeightRequest" Value="48"/>
+        </Style>
+
+        <!-- Botón primario (Ingresar) -->
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="BackgroundColor" Value="#3B82F6"/>
+        </Style>
+
+        <!-- Botón secundario (Crear cuenta / Mostrar contraseña / Biometría) -->
+        <Style x:Key="SecondaryBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="BackgroundColor" Value="#374151"/>
+        </Style>
+
+        <!-- Botón especial para biometría (mismo layout que los demás, color distinto) -->
+        <Style x:Key="BiometricBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="BackgroundColor" Value="#243B53"/>
+        </Style>
+    </ContentPage.Resources>
+
     <Grid>
         <!-- Fondo gradiente -->
         <BoxView>
@@ -18,6 +46,7 @@
 
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="18" VerticalOptions="CenterAndExpand">
+
                 <!-- Card -->
                 <Frame Padding="20" CornerRadius="18" HasShadow="True" BackgroundColor="#111827" Margin="0,12">
                     <VerticalStackLayout Spacing="14">
@@ -45,7 +74,7 @@
                         <!-- Contraseña -->
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Contraseña" TextColor="#E5E7EB" FontSize="12"/>
-                            <Grid ColumnDefinitions="*,Auto">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                                 <Frame Grid.Column="0" Padding="10" CornerRadius="12" HasShadow="False" BackgroundColor="#0b1220">
                                     <Entry x:Name="txtPass"
                                            Placeholder="********"
@@ -55,28 +84,23 @@
                                            Completed="Pass_Completed"
                                            ReturnType="Go"/>
                                 </Frame>
+                                <!-- Botón Mostrar/Ocultar con estilo secundario y tamaño consistente -->
                                 <Button Grid.Column="1"
                                         x:Name="btnTogglePass"
                                         Text="Mostrar"
                                         Clicked="TogglePassword_Clicked"
-                                        BackgroundColor="#374151"
-                                        TextColor="White"
-                                        CornerRadius="10"
-                                        Padding="10,6"
-                                        Margin="8,0,0,0"/>
+                                        Style="{StaticResource SecondaryBtn}"
+                                        Padding="12,8"
+                                        Margin="8,0,0,0"
+                                        WidthRequest="120"/>
                             </Grid>
                         </VerticalStackLayout>
 
-                        <!-- Botón biometría (sin recordarme) -->
-                        <HorizontalStackLayout HorizontalOptions="End">
-                            <Button x:Name="btnBio"
-                                    Text="Ingresar con biometría"
-                                    Clicked="BtnBio_Clicked"
-                                    BackgroundColor="#243B53"
-                                    TextColor="White"
-                                    CornerRadius="10"
-                                    Padding="10,6"/>
-                        </HorizontalStackLayout>
+                        <!-- Botón biometría (ahora a ancho completo y con mismo alto) -->
+                        <Button x:Name="btnBio"
+                                Text="Ingresar con biometría"
+                                Clicked="BtnBio_Clicked"
+                                Style="{StaticResource BiometricBtn}"/>
 
                         <!-- Error inline -->
                         <Label x:Name="lblError"
@@ -90,18 +114,13 @@
                             <Button x:Name="btnIngresar"
                                     Text="Ingresar"
                                     Clicked="BtnIngresar_Clicked"
-                                    BackgroundColor="#3B82F6"
-                                    TextColor="White"
-                                    CornerRadius="12"
-                                    Padding="14,10"/>
+                                    Style="{StaticResource PrimaryBtn}"/>
 
                             <Button Text="Crear cuenta"
                                     Clicked="BtnIrRegistro_Clicked"
-                                    BackgroundColor="#374151"
-                                    TextColor="White"
-                                    CornerRadius="12"
-                                    Padding="12,8"/>
+                                    Style="{StaticResource SecondaryBtn}"/>
                         </VerticalStackLayout>
+
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
