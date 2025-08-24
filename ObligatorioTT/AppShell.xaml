@@ -12,6 +12,35 @@
     TitleColor="{DynamicResource ShellTitleColor}"
     FlyoutBackgroundColor="{DynamicResource ShellBackgroundColor}">
 
+    <!-- ================== Recursos (íconos con LIGADURAS) ================== -->
+    <Shell.Resources>
+        <ResourceDictionary>
+            <!-- Material Icons (baseline) por codepoint -->
+            <FontImageSource x:Key="icoHome"       FontFamily="MaterialIcons" Glyph="&#xE88A;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- home -->
+            <FontImageSource x:Key="icoProfile"    FontFamily="MaterialIcons" Glyph="&#xE853;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- account_circle -->
+            <FontImageSource x:Key="icoWeather"    FontFamily="MaterialIcons" Glyph="&#xE430;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- wb_sunny -->
+            <FontImageSource x:Key="icoRates"      FontFamily="MaterialIcons" Glyph="&#xE8E5;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- attach_money -->
+            <FontImageSource x:Key="icoNews"       FontFamily="MaterialIcons" Glyph="&#xE0E3;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- article -->
+            <FontImageSource x:Key="icoMovies"     FontFamily="MaterialIcons" Glyph="&#xE02C;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- movie -->
+            <FontImageSource x:Key="icoSponsors"   FontFamily="MaterialIcons" Glyph="&#xE55F;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- place -->
+            <FontImageSource x:Key="icoMap"        FontFamily="MaterialIcons" Glyph="&#xE55B;" Size="22" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- map -->
+            <!-- Footer -->
+            <FontImageSource x:Key="icoPrefs"      FontFamily="MaterialIcons" Glyph="&#xE8B8;" Size="20" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- settings -->
+            <FontImageSource x:Key="icoLogout"     FontFamily="MaterialIcons" Glyph="&#xE9BA;" Size="20" Color="{DynamicResource ShellForegroundColor}" />
+            <!-- logout -->
+        </ResourceDictionary>
+    </Shell.Resources>
+
+
     <!-- ================== Items del Flyout ================== -->
     <FlyoutItem x:Name="RootItem"
                 FlyoutDisplayOptions="AsMultipleItems"
@@ -20,41 +49,49 @@
 
         <ShellContent x:Name="InicioItem"
                       Title="Inicio"
+                       Icon="ic_home.svg"
                       Route="MainPage"
                       ContentTemplate="{DataTemplate local:MainPage}" />
 
         <ShellContent x:Name="PerfilItem"
                       Title="Mi perfil"
+                      Icon="ic_profile.png"
                       Route="PerfilPage"
                       ContentTemplate="{DataTemplate views:PerfilPage}" />
 
         <ShellContent x:Name="ClimaItem"
                       Title="Clima"
+                      Icon="ic_weather.png"
                       Route="ClimaPage"
                       ContentTemplate="{DataTemplate views:ClimaPage}" />
 
         <ShellContent x:Name="CotizacionesItem"
                       Title="Cotizaciones"
+                      Icon="ic_rates.png"
                       Route="CotizacionesPage"
                       ContentTemplate="{DataTemplate views:CotizacionesPage}" />
 
         <ShellContent x:Name="NoticiasItem"
                       Title="Noticias"
+                      Icon="ic_news.png"
                       Route="NoticiasPage"
                       ContentTemplate="{DataTemplate views:NoticiasPage}" />
 
         <ShellContent x:Name="PeliculasItem"
                       Title="Películas"
+                      Icon="ic_movies.png"
                       Route="PeliculasPage"
                       ContentTemplate="{DataTemplate views:PeliculasPage}" />
 
         <ShellContent x:Name="PatrocinadoresItem"
                       Title="Patrocinadores"
+                      Icon="ic_sponsors.png"
                       Route="PatrocinadoresPage"
                       ContentTemplate="{DataTemplate views:PatrocinadoresPage}" />
 
         <ShellContent x:Name="MapaItem"
                       Title="Mapa"
+                      Icon="ic_map.png"
                       Route="MapaPage"
                       ContentTemplate="{DataTemplate views:MapaPage}" />
 
@@ -65,19 +102,20 @@
         <Grid Padding="0,0,0,14" BackgroundColor="{DynamicResource ShellBackgroundColor}">
             <VerticalStackLayout Spacing="0" Padding="0">
 
-                <!-- Preferencias -->
                 <Grid x:Name="PrefRow"
                       Padding="16,14"
                       BackgroundColor="Transparent"
                       HorizontalOptions="FillAndExpand">
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <!-- Solo texto -->
+                        <Image Source="ic_prefs.png"
+               WidthRequest="20"
+               HeightRequest="20"
+               VerticalOptions="Center"/>
                         <Label Text="Preferencias"
                                FontSize="16"
                                TextColor="{DynamicResource ShellForegroundColor}"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
-
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnPreferenciasFooterTapped" />
                     </Grid.GestureRecognizers>
@@ -87,19 +125,20 @@
                          BackgroundColor="{DynamicResource ShellSeparatorColor}"
                          Opacity="0.08" />
 
-                <!-- Cerrar sesión -->
                 <Grid x:Name="LogoutRow"
                       Padding="16,14"
                       BackgroundColor="Transparent"
                       HorizontalOptions="FillAndExpand">
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <!-- Solo texto -->
+                        <Image Source="ic_logout.png"
+               WidthRequest="20"
+               HeightRequest="20"
+               VerticalOptions="Center"/>
                         <Label Text="Cerrar sesión"
                                FontSize="16"
                                TextColor="{DynamicResource ShellForegroundColor}"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
-
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCerrarSesionFooterTapped" />
                     </Grid.GestureRecognizers>
